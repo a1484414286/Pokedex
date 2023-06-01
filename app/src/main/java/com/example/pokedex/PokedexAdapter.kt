@@ -6,8 +6,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -15,18 +13,12 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
-import androidx.core.graphics.drawable.toBitmap
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.CenterCrop
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-
-import java.io.ByteArrayOutputStream
 
 
 class PokedexAdapter (private val context: Context, private val pokemonList : List<Pokemon>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    private var hashTable : HashMap<String, Int> = HashMap<String, Int>().apply {
+    private val hashTable : HashMap<String, Int> = HashMap<String, Int>().apply {
         R.drawable.normal?.let { put("Normal", it) };
         R.drawable.fire?.let{put("Fire",it)}
         R.drawable.flying?.let { put("Flying", it) };
@@ -45,24 +37,6 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
         R.drawable.steel?.let { put("Steel", it) };
         R.drawable.ground?.let { put("Ground", it) };
         R.drawable.fairy?.let { put("Fairy", it) };
-//        resizeImageToFit(context, R.drawable.normal, 125, 50)?.let { put("Normal", it) }
-//        resizeImageToFit(context, R.drawable.flying, 125, 50)?.let { put("Flying", it) }
-//        resizeImageToFit(context, R.drawable.fire, 125, 50)?.let { put("Fire", it) }
-//        resizeImageToFit(context, R.drawable.psychic, 130, 50)?.let { put("Psychic", it) }
-//        resizeImageToFit(context, R.drawable.water, 130, 50)?.let { put("Water", it) }
-//        resizeImageToFit(context, R.drawable.bug, 130, 50)?.let { put("Bug", it) }
-//        resizeImageToFit(context, R.drawable.grass, 80, 40)?.let { put("Grass", it) }
-//        resizeImageToFit(context, R.drawable.rock, 80, 40)?.let { put("Rock", it) }
-//        resizeImageToFit(context, R.drawable.electric, 80, 40)?.let { put("Electric", it) }
-//        resizeImageToFit(context, R.drawable.ghost, 80, 40)?.let { put("Ghost", it) }
-//        resizeImageToFit(context, R.drawable.ice, 80, 40)?.let { put("Ice", it) }
-//        resizeImageToFit(context, R.drawable.dark, 80, 40)?.let { put("Dark", it) }
-//        resizeImageToFit(context, R.drawable.fighting, 80, 40)?.let { put("Fighting", it) }
-//        resizeImageToFit(context, R.drawable.dragon, 80, 40)?.let { put("Dragon", it) }
-//        resizeImageToFit(context, R.drawable.poison, 80, 40)?.let { put("Poison", it) }
-//        resizeImageToFit(context, R.drawable.steel, 80, 40)?.let { put("Steel", it) }
-//        resizeImageToFit(context, R.drawable.ground, 80, 40)?.let { put("Ground", it) }
-//        resizeImageToFit(context, R.drawable.fairy, 80, 40)?.let { put("Fairy", it) }
     };
 
 
@@ -75,7 +49,7 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
 
     class ViewHolderOne(view: View) : RecyclerView.ViewHolder(view) {
         val name : TextView
-        internal val animated_sprites: ImageView
+        val animated_sprites: ImageView
         val type1 : ImageButton
 
         init {
@@ -121,24 +95,29 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
             ITEM_TYPE_ONE -> {
                 val viewHolderOne = holder as ViewHolderOne
                 viewHolderOne.name.text = pokemonList[position].name;
-//                viewHolderOne.type1.setImageDrawable(hashTable.get(pokemonList[position].type1)
-//                    ?.let { resizeImageToFit(context, it,120,50) })
+                viewHolderOne.type1.setImageDrawable(
+                    hashTable[pokemonList[position].type1]
 
+                    ?.let { resizeImageToFit(context, it,120,50) })
                 Glide.with(viewHolderOne.itemView)
-                    .load(context.getDrawable(R.drawable.ani_bw_006))
+
+                    .load( context.getDrawable(pokemonList[position].imageSource))
                     .into(viewHolderOne.animated_sprites)
-                Log.d("success","success")
-            }
-
-
-
-                ITEM_TYPE_TWO -> {
-//                val viewHolder = holder as ViewHolderTwo
-//                viewHolder.name.text = pokemonList[position].name;
-//                viewHolder.type1.setImageDrawable(hashTable[pokemonList[position].type1])
-//                viewHolder.type2.setImageDrawable(hashTable[pokemonList[position].type2])
 
             }
+
+
+
+            ITEM_TYPE_TWO -> {
+                val viewHolderTwo = holder as ViewHolderTwo
+                viewHolderTwo.name.text = pokemonList[position].name
+                viewHolderTwo.type1.setImageDrawable(hashTable[pokemonList[position].type1]?.let { resizeImageToFit(context, it, 120, 50) })
+                viewHolderTwo.type2.setImageDrawable(hashTable[pokemonList[position].type2]?.let { resizeImageToFit(context, it, 120, 50) })
+                Glide.with(viewHolderTwo.itemView)
+                    .load(context.getDrawable(pokemonList[position].imageSource))
+                    .into(viewHolderTwo.animated_sprites)
+            }
+
         }
     }
 
@@ -152,8 +131,8 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
         }
     }
 
-    fun resizeImageToFit(context: Context, imageResId: Int, targetWidth: Int, targetHeight: Int): BitmapDrawable? {
-        try {
+    private fun resizeImageToFit(context: Context, imageResId: Int, targetWidth: Int, targetHeight: Int): BitmapDrawable? {
+        return try {
             val options = BitmapFactory.Options().apply {
                 inJustDecodeBounds = true
                 BitmapFactory.decodeResource(context.resources, imageResId, this)
@@ -162,10 +141,10 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
             }
             val bitmap = BitmapFactory.decodeResource(context.resources, imageResId, options)
             val scaledBitmap = Bitmap.createScaledBitmap(bitmap, targetWidth, targetHeight, true)
-            return BitmapDrawable(context.resources, scaledBitmap)
+            BitmapDrawable(context.resources, scaledBitmap)
         } catch (e: Exception) {
             Log.e("ImageResize", "Error resizing image: ${e.message}")
-            return null
+            null
         }
     }
 
