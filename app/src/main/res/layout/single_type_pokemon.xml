@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_margin="10dp"
-    android:layout_width="150dp"
-    android:layout_height="170dp">
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:id="@+id/singleItemLayout">
 
 
     <ImageView
@@ -12,15 +12,15 @@
         android:layout_weight="1"
         android:gravity="center"
         android:elevation="2dp"
-        android:layout_marginStart="20dp"
+        android:layout_marginStart="35dp"
         android:contentDescription="Pokemon Image"
         />
 
     <LinearLayout
         android:id="@+id/infoBox"
 
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="130dp"
+        android:layout_height="160dp"
         android:orientation="vertical"
         android:gravity="center"
         android:layout_marginStart="20dp"
@@ -43,7 +43,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/gorditas"
-                android:paddingTop="10dp"
+                android:paddingTop="13dp"
                 android:text="§ 001"
                 android:textColor="#000000"
                 android:textSize="10sp" />
@@ -52,16 +52,18 @@
                 android:id="@+id/pokemonName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="cursive"
                 android:paddingTop="4dp"
+                android:layout_marginTop="10dp"
                 android:text="Pokemon Name"
                 android:textColor="#000000"
-                android:textSize="10sp" />
+                android:textSize="15sp" />
 
             <ImageButton
                 android:id="@+id/type1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="20dp"
                 android:background="@android:color/transparent"
                 android:scaleType="fitCenter" />
 
