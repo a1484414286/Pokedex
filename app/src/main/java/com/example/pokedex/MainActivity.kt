@@ -22,15 +22,11 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         recyclerView = findViewById(R.id.verticalRecyclerView)
         recyclerView.layoutManager = GridLayoutManager(this, 3)
         pokemonList = ArrayList()
-
-
         val adapter = PokedexAdapter(this, pokemonList)
         recyclerView.adapter = adapter
         onclickAdd();
@@ -39,6 +35,8 @@ class MainActivity : AppCompatActivity() {
     private fun onclickAdd()
     {
         val pokemon2 = Pokemon(R.drawable.ani_bw_006, "Charizard", "Fire")
+        val pokemon3 = Pokemon(R.drawable.ani_bw_006, "Charizard", "Fire", "Flying")
+        pokemonList.add(pokemon3)
         pokemonList.add(pokemon2)
         pokemonList.add(pokemon2)
         pokemonList.add(pokemon2)

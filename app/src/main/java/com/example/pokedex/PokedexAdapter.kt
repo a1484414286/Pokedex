@@ -2,6 +2,7 @@ package com.example.pokedex
 
 
 import Pokemon
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -16,38 +17,34 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 
 
 class PokedexAdapter (private val context: Context, private val pokemonList : List<Pokemon>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private val hashTable : HashMap<String, Int> = HashMap<String, Int>().apply {
-        R.drawable.normal?.let { put("Normal", it) };
-        R.drawable.fire?.let{put("Fire",it)}
-        R.drawable.flying?.let { put("Flying", it) };
-        R.drawable.psychic?.let { put("Psychic", it) };
-        R.drawable.water?.let { put("Water", it) };
-        R.drawable.bug?.let { put("Bug", it) };
-        R.drawable.grass?.let { put("Grass", it) };
-        R.drawable.rock?.let { put("Rock", it) };
-        R.drawable.electric?.let { put("Electric", it) };
-        R.drawable.ghost?.let { put("Ghost", it) };
-        R.drawable.ice?.let { put("Ice", it) };
-        R.drawable.dark?.let { put("Dark", it) };
-        R.drawable.fighting?.let { put("Fighting", it) };
-        R.drawable.dragon?.let { put("Dragon", it) };
-        R.drawable.poison?.let { put("Poison", it) };
-        R.drawable.steel?.let { put("Steel", it) };
-        R.drawable.ground?.let { put("Ground", it) };
-        R.drawable.fairy?.let { put("Fairy", it) };
-    };
-    private var count = 0;
-
-
+        R.drawable.normal.let { put("Normal", it) }
+        R.drawable.fire.let{put("Fire",it)}
+        R.drawable.flying.let { put("Flying", it) }
+        R.drawable.psychic.let { put("Psychic", it) }
+        R.drawable.water.let { put("Water", it) }
+        R.drawable.bug.let { put("Bug", it) }
+        R.drawable.grass.let { put("Grass", it) }
+        R.drawable.rock.let { put("Rock", it) }
+        R.drawable.electric.let { put("Electric", it) }
+        R.drawable.ghost.let { put("Ghost", it) }
+        R.drawable.ice.let { put("Ice", it) }
+        R.drawable.dark.let { put("Dark", it) }
+        R.drawable.fighting.let { put("Fighting", it) }
+        R.drawable.dragon.let { put("Dragon", it) }
+        R.drawable.poison.let { put("Poison", it) }
+        R.drawable.steel.let { put("Steel", it) }
+        R.drawable.ground.let { put("Ground", it) }
+        R.drawable.fairy.let { put("Fairy", it) }
+    }
     companion object{
-        private val ITEM_TYPE_ONE = 1;
-        private val ITEM_TYPE_TWO = 2;
+        private const val ITEM_TYPE_ONE = 1
+        private const val ITEM_TYPE_TWO = 2
 
     }
 
@@ -79,17 +76,27 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
         }
     }
 
-    private fun adjustRelativeLayoutSize(view: View) {
+    private fun adjustRelativeLayoutSize(view: View, viewType: Int) {
         val displayMetrics = DisplayMetrics()
         val windowManager = view.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         windowManager.defaultDisplay.getMetrics(displayMetrics)
         val screenWidth = displayMetrics.widthPixels
         val screenHeight = displayMetrics.heightPixels
-        val itemWidth = (screenWidth / 3) - (2 * 5) // Adjust the left and right margin as needed
+        val itemWidth = (screenWidth / 3) - (2 * 10) // Adjust the left and right margin as needed
         val itemHeight = (screenHeight * 0.4).toInt() // Adjust the percentage as needed
-        val relativeLayout = view.findViewById<RelativeLayout>(R.id.singleItemLayout)
-        val layoutParams = RelativeLayout.LayoutParams(itemWidth, itemHeight)
-        relativeLayout.layoutParams = layoutParams
+        if(viewType == ITEM_TYPE_ONE)
+        {
+            val relativeLayout = view.findViewById<RelativeLayout>(R.id.singleItemLayout)
+            val layoutParams = RelativeLayout.LayoutParams(itemWidth, itemHeight)
+            relativeLayout.layoutParams = layoutParams
+        }
+        else
+        {
+            val relativeLayout = view.findViewById<RelativeLayout>(R.id.doubleItemLayout)
+            val layoutParams = RelativeLayout.LayoutParams(itemWidth, itemHeight)
+            relativeLayout.layoutParams = layoutParams
+        }
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -100,7 +107,7 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
             ITEM_TYPE_TWO -> inflater.inflate(R.layout.duo_type_pokemon, parent, false)
             else -> throw IllegalArgumentException("Invalid view type: $viewType")
         }
-        adjustRelativeLayoutSize(view)
+        adjustRelativeLayoutSize(view, viewType)
         return when (viewType) {
             ITEM_TYPE_ONE -> ViewHolderOne(view)
             ITEM_TYPE_TWO -> ViewHolderTwo(view)
@@ -108,6 +115,7 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
         }
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 
         when(holder.itemViewType)
@@ -115,14 +123,12 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
 
             ITEM_TYPE_ONE -> {
                 val viewHolderOne = holder as ViewHolderOne
-                adjustRelativeLayoutSize(viewHolderOne.itemView)
-                viewHolderOne.name.text = pokemonList[position].name;
+                viewHolderOne.name.text = pokemonList[position].name
                 viewHolderOne.type1.setImageDrawable(
                     hashTable[pokemonList[position].type1]
 
                     ?.let { resizeImageToFit(context, it,120,50) })
                 Glide.with(viewHolderOne.itemView)
-
                     .load( context.getDrawable(pokemonList[position].imageSource))
                     .into(viewHolderOne.animated_sprites)
             }
@@ -135,7 +141,6 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
                 Glide.with(viewHolderTwo.itemView)
                     .load(context.getDrawable(pokemonList[position].imageSource))
                     .into(viewHolderTwo.animated_sprites)
-                adjustRelativeLayoutSize(viewHolderTwo.itemView)
             }
 
         }
@@ -185,6 +190,6 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
     }
 
     override fun getItemCount(): Int {
-       return pokemonList.size;
+       return pokemonList.size
     }
 }
