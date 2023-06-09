@@ -1,11 +1,14 @@
+import android.graphics.drawable.Drawable
 
 data class Pokemon(
-    var imageSource: Int,
-    var name: String,
+    var id: Int,
+    var imageSource: Drawable?,
+    var name: String?,
     var type1: String,
     var type2: String
 ) {
-    constructor(imageSource: Int, name: String, type1: String) : this(
+    constructor(id : Int, imageSource: Drawable, name: String, type1: String) : this(
+        id,
         imageSource,
         name,
         type1,

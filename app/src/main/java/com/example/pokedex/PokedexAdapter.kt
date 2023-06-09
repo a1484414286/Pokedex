@@ -23,24 +23,24 @@ import com.bumptech.glide.Glide
 
 class PokedexAdapter (private val context: Context, private val pokemonList : List<Pokemon>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private val hashTable : HashMap<String, Int> = HashMap<String, Int>().apply {
-        R.drawable.normal.let { put("Normal", it) }
-        R.drawable.fire.let{put("Fire",it)}
-        R.drawable.flying.let { put("Flying", it) }
-        R.drawable.psychic.let { put("Psychic", it) }
-        R.drawable.water.let { put("Water", it) }
-        R.drawable.bug.let { put("Bug", it) }
-        R.drawable.grass.let { put("Grass", it) }
-        R.drawable.rock.let { put("Rock", it) }
-        R.drawable.electric.let { put("Electric", it) }
-        R.drawable.ghost.let { put("Ghost", it) }
-        R.drawable.ice.let { put("Ice", it) }
-        R.drawable.dark.let { put("Dark", it) }
-        R.drawable.fighting.let { put("Fighting", it) }
-        R.drawable.dragon.let { put("Dragon", it) }
-        R.drawable.poison.let { put("Poison", it) }
-        R.drawable.steel.let { put("Steel", it) }
-        R.drawable.ground.let { put("Ground", it) }
-        R.drawable.fairy.let { put("Fairy", it) }
+        R.drawable.normal.let { put("normal", it) }
+        R.drawable.fire.let{put("fire",it)}
+        R.drawable.flying.let { put("flying", it) }
+        R.drawable.psychic.let { put("psychic", it) }
+        R.drawable.water.let { put("water", it) }
+        R.drawable.bug.let { put("bug", it) }
+        R.drawable.grass.let { put("grass", it) }
+        R.drawable.rock.let { put("rock", it) }
+        R.drawable.electric.let { put("electric", it) }
+        R.drawable.ghost.let { put("ghost", it) }
+        R.drawable.ice.let { put("ice", it) }
+        R.drawable.dark.let { put("dark", it) }
+        R.drawable.fighting.let { put("fighting", it) }
+        R.drawable.dragon.let { put("dragon", it) }
+        R.drawable.poison.let { put("poison", it) }
+        R.drawable.steel.let { put("steel", it) }
+        R.drawable.ground.let { put("ground", it) }
+        R.drawable.fairy.let { put("fairy", it) }
     }
     companion object{
         private const val ITEM_TYPE_ONE = 1
@@ -49,11 +49,13 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
     }
 
     class ViewHolderOne(view: View) : RecyclerView.ViewHolder(view) {
+        val id : TextView
         val name : TextView
         val animated_sprites: ImageView
         val type1 : ImageButton
         init {
             // Find our RecyclerView item's ImageView for future use
+            id = view.findViewById(R.id.Id)
             name = view.findViewById(R.id.pokemonName)
             animated_sprites = view.findViewById(R.id.pokemonImage)
             type1 = view.findViewById(R.id.type1)
@@ -62,12 +64,14 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
 
 
     class ViewHolderTwo(view: View) : RecyclerView.ViewHolder(view) {
+        val id : TextView
         val name : TextView
         val animated_sprites: ImageView
         val type1 : ImageButton
         val type2 : ImageButton
 
         init {
+            id = view.findViewById(R.id.Id)
             // Find our RecyclerView item's ImageView for future use
             name = view.findViewById(R.id.pokemonName)
             animated_sprites = view.findViewById(R.id.pokemonImage)
@@ -123,23 +127,25 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
 
             ITEM_TYPE_ONE -> {
                 val viewHolderOne = holder as ViewHolderOne
+                viewHolderOne.id.text = "§ " + pokemonList[position].id.toString()
                 viewHolderOne.name.text = pokemonList[position].name
                 viewHolderOne.type1.setImageDrawable(
                     hashTable[pokemonList[position].type1]
 
                     ?.let { resizeImageToFit(context, it,120,50) })
                 Glide.with(viewHolderOne.itemView)
-                    .load( context.getDrawable(pokemonList[position].imageSource))
+                    .load(pokemonList[position].imageSource)
                     .into(viewHolderOne.animated_sprites)
             }
 
             ITEM_TYPE_TWO -> {
                 val viewHolderTwo = holder as ViewHolderTwo
+                viewHolderTwo.id.text = "§ " + pokemonList[position].id.toString()
                 viewHolderTwo.name.text = pokemonList[position].name
                 viewHolderTwo.type1.setImageDrawable(hashTable[pokemonList[position].type1]?.let { resizeImageToFit(context, it, 120, 50) })
                 viewHolderTwo.type2.setImageDrawable(hashTable[pokemonList[position].type2]?.let { resizeImageToFit(context, it, 120, 50) })
                 Glide.with(viewHolderTwo.itemView)
-                    .load(context.getDrawable(pokemonList[position].imageSource))
+                    .load(pokemonList[position].imageSource)
                     .into(viewHolderTwo.animated_sprites)
             }
 
