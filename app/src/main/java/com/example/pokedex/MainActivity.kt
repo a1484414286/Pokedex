@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addData() {
-        val maxIndex = 500
+        val maxIndex = 807
         val scope = CoroutineScope(Dispatchers.Main)
         val sortedMap: SortedMap<Int, Pokemon> = Collections.synchronizedSortedMap(TreeMap())
 

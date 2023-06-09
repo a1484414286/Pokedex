@@ -24,7 +24,7 @@
         android:layout_marginStart="20dp"
         android:background="@drawable/rounded_box"
         android:layout_gravity="center"
-        android:layout_marginTop="70dp"
+        android:layout_marginTop="50dp"
         >
 
 
@@ -43,15 +43,15 @@
             android:paddingTop="13dp"
             android:text="§ 001"
             android:textColor="#000000"
-            android:textSize="10sp" />
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/pokemonName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="cursive"
-            android:paddingTop="4dp"
             android:layout_marginTop="10dp"
+            android:fontFamily="@font/lato"
+            android:paddingTop="4dp"
             android:text="Pokemon Name"
             android:textColor="#000000"
             android:textSize="15sp" />
