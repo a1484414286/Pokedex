@@ -1,6 +1,6 @@
 # Pokédex App
 
-![Demo](https://i.ibb.co/wQ0WVPH/pokedex6.gif)
+![Demo](<a href="https://ibb.co/n1gc9Y2"><img src="https://i.ibb.co/wQ0WVPH/pokedex6.gif" alt="pokedex6" border="0"></a>)
 
 
 ## Description
