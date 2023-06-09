@@ -1,6 +1,6 @@
 # Pokédex App
 
-![Demo](https://imgur.com/2zHHrge.gif)
+![Demo](https://i.imgur.com/2zHHrge.gif)
 
 
 ## Description
