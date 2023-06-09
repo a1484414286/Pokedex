@@ -1,6 +1,6 @@
 # Pokédex App
 
-![Demo](./demo.gif)
+![Demo](/demo.gif)
 
 ## Description
 
