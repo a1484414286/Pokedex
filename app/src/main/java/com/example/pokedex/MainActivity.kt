@@ -3,6 +3,8 @@ package com.example.pokedex
 import Pokemon
 import android.os.Bundle
 import android.util.Log
+import android.widget.ImageButton
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
@@ -34,15 +36,19 @@ class MainActivity : AppCompatActivity() {
     private val database = Firebase.database
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        FirebaseApp.initializeApp(this)
+//        FirebaseApp.initializeApp(this)
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        recyclerView = findViewById(R.id.verticalRecyclerView)
-        recyclerView.layoutManager = GridLayoutManager(this, 3)
-        pokemonList = ArrayList()
-        addData()
-        val adapter = PokedexAdapter(this, pokemonList)
-        recyclerView.adapter = adapter
+        setContentView(R.layout.status_page)
+        var m = findViewById<ImageView>(R.id.pokemonAvatar)
+        m.setImageDrawable(getDrawable(R.drawable.p9))
+        var button = findViewById<ImageButton>(R.id.genderSwitch)
+        button.setImageDrawable(getDrawable(R.drawable.gender_switch))
+//        recyclerView = findViewById(R.id.verticalRecyclerView)
+//        recyclerView.layoutManager = GridLayoutManager(this, 3)
+//        pokemonList = ArrayList()
+//        addData()
+//        val adapter = PokedexAdapter(this, pokemonList)
+//        recyclerView.adapter = adapter
 //        fetchData();
 //        deleteData()
     }
