@@ -9,10 +9,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import com.codepath.asynchttpclient.AsyncHttpClient
 import com.codepath.asynchttpclient.RequestParams
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler
-import com.google.firebase.FirebaseApp
+import com.example.pokedex.swipes.PageAdapter
+import com.google.android.material.tabs.TabLayout
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -33,24 +35,69 @@ class MainActivity : AppCompatActivity() {
     private lateinit var pokemonList: MutableList<Pokemon>
     private lateinit var recyclerView: RecyclerView
     private lateinit var list: ArrayList<String>
+    private lateinit var viewPager : ViewPager2;
+    private lateinit var tabLayout: TabLayout;
+    private lateinit var pageAdapter : PageAdapter;
     private val database = Firebase.database
 
     override fun onCreate(savedInstanceState: Bundle?) {
 //        FirebaseApp.initializeApp(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.status_page)
+        statsAvatarSetup()
+        tabsContentSwitch()
+
+//        pokemonRecyclerViewSetup()
+//        fetchData();
+//        deleteData()
+    }
+
+    private fun statsAvatarSetup()
+    {
         var m = findViewById<ImageView>(R.id.pokemonAvatar)
         m.setImageDrawable(getDrawable(R.drawable.p9))
         var button = findViewById<ImageButton>(R.id.genderSwitch)
         button.setImageDrawable(getDrawable(R.drawable.gender_switch))
-//        recyclerView = findViewById(R.id.verticalRecyclerView)
-//        recyclerView.layoutManager = GridLayoutManager(this, 3)
-//        pokemonList = ArrayList()
-//        addData()
-//        val adapter = PokedexAdapter(this, pokemonList)
-//        recyclerView.adapter = adapter
-//        fetchData();
-//        deleteData()
+    }
+
+    private fun tabsContentSwitch()
+    {
+
+        tabLayout = findViewById(R.id.tab_layout)
+        viewPager = findViewById(R.id.view_pager)
+        pageAdapter = PageAdapter(supportFragmentManager,lifecycle)
+        viewPager.adapter = pageAdapter
+        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab) {
+                viewPager.currentItem = tab.position
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab) {
+                // Called when a tab is unselected
+            }
+
+            override fun onTabReselected(tab: TabLayout.Tab) {
+                // Called when a tab is reselected (tab is already selected)
+            }
+        })
+
+        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                tabLayout.selectTab(tabLayout.getTabAt(position))
+            }
+        })
+    }
+
+
+    private fun pokemonRecyclerViewSetup()
+    {
+        recyclerView = findViewById(R.id.verticalRecyclerView)
+        recyclerView.layoutManager = GridLayoutManager(this, 3)
+        pokemonList = ArrayList()
+        addData()
+        val adapter = PokedexAdapter(this, pokemonList)
+        recyclerView.adapter = adapter
     }
 
     private fun test(index: Int, callback: (name: String?, types: List<Any>?) -> Unit) {
