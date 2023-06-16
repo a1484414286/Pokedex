@@ -4,9 +4,11 @@ package com.example.pokedex
 import Pokemon
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,8 +19,10 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.pokedex.swipes.InfoActivity
 
 
 class PokedexAdapter (private val context: Context, private val pokemonList : List<Pokemon>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -59,7 +63,19 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
             name = view.findViewById(R.id.pokemonName)
             animated_sprites = view.findViewById(R.id.pokemonImage)
             type1 = view.findViewById(R.id.type1)
+            view.findViewById<RelativeLayout>(R.id.singleItemLayout).isClickable = false
+            animated_sprites.isClickable = true;
+            view.setOnClickListener{
+                var intent = Intent(view.context, InfoActivity::class.java)
+                intent.putExtra("id",id.text)
+                intent.putExtra("sprite",animated_sprites.drawable.toString())
+                view.context.startActivity(intent)
+                Toast.makeText(view.context,"${id.text} is clicked",Toast.LENGTH_SHORT).show()
+            }
+
         }
+
+
     }
 
 
@@ -77,7 +93,17 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
             animated_sprites = view.findViewById(R.id.pokemonImage)
             type1 = view.findViewById(R.id.type1)
             type2 = view.findViewById(R.id.type2)
+            view.findViewById<RelativeLayout>(R.id.doubleItemLayout).isClickable = false
+            view.findViewById<ImageView>(R.id.pokemonImage).isClickable = true;
+            view.setOnClickListener{
+                    var intent = Intent(view.context, InfoActivity::class.java)
+                    intent.putExtra("id",id.text)
+                    intent.putExtra("sprite",animated_sprites.drawable.toString())
+                    view.context.startActivity(intent)
+                    Toast.makeText(view.context,"${id.text} is clicked",Toast.LENGTH_SHORT).show()
+                }
         }
+
     }
 
     private fun adjustRelativeLayoutSize(view: View, viewType: Int) {
@@ -87,18 +113,21 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
         val screenWidth = displayMetrics.widthPixels
         val screenHeight = displayMetrics.heightPixels
         val itemWidth = (screenWidth / 3) - (2 * 10) // Adjust the left and right margin as needed
-        val itemHeight = (screenHeight * 0.4).toInt() // Adjust the percentage as needed
+        val itemHeight = (screenHeight * 0.3).toInt() // Adjust the percentage as needed
         if(viewType == ITEM_TYPE_ONE)
         {
             val relativeLayout = view.findViewById<RelativeLayout>(R.id.singleItemLayout)
             val layoutParams = RelativeLayout.LayoutParams(itemWidth, itemHeight)
             relativeLayout.layoutParams = layoutParams
+            relativeLayout.isClickable = false
         }
         else
         {
             val relativeLayout = view.findViewById<RelativeLayout>(R.id.doubleItemLayout)
             val layoutParams = RelativeLayout.LayoutParams(itemWidth, itemHeight)
             relativeLayout.layoutParams = layoutParams
+            relativeLayout.isClickable = false
+
         }
 
     }
@@ -162,7 +191,7 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
         }
     }
 
-    private fun resizeImageToFit(context: Context, imageResId: Int, targetWidth: Int, targetHeight: Int): BitmapDrawable? {
+    private fun resizeImageToFit(context: Context, imageResId: Int, targetWidth: Int, targetHeight: Int): Drawable? {
         return try {
             val options = BitmapFactory.Options().apply {
                 inJustDecodeBounds = true

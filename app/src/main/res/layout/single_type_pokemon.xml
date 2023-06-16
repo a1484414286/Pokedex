@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="0dp"
     android:layout_height="0dp"
-    android:id="@+id/singleItemLayout">
+    android:id="@+id/singleItemLayout"
+>
 
 
     <ImageView
