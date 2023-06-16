@@ -63,12 +63,12 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
             name = view.findViewById(R.id.pokemonName)
             animated_sprites = view.findViewById(R.id.pokemonImage)
             type1 = view.findViewById(R.id.type1)
-            view.findViewById<RelativeLayout>(R.id.singleItemLayout).isClickable = false
-            animated_sprites.isClickable = true;
             view.setOnClickListener{
                 var intent = Intent(view.context, InfoActivity::class.java)
                 intent.putExtra("id",id.text)
+                intent.putExtra("name",name.text)
                 intent.putExtra("sprite",animated_sprites.drawable.toString())
+                intent.putExtra("type1",type1.drawable.toString())
                 view.context.startActivity(intent)
                 Toast.makeText(view.context,"${id.text} is clicked",Toast.LENGTH_SHORT).show()
             }
@@ -93,14 +93,15 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
             animated_sprites = view.findViewById(R.id.pokemonImage)
             type1 = view.findViewById(R.id.type1)
             type2 = view.findViewById(R.id.type2)
-            view.findViewById<RelativeLayout>(R.id.doubleItemLayout).isClickable = false
-            view.findViewById<ImageView>(R.id.pokemonImage).isClickable = true;
             view.setOnClickListener{
-                    var intent = Intent(view.context, InfoActivity::class.java)
-                    intent.putExtra("id",id.text)
-                    intent.putExtra("sprite",animated_sprites.drawable.toString())
-                    view.context.startActivity(intent)
-                    Toast.makeText(view.context,"${id.text} is clicked",Toast.LENGTH_SHORT).show()
+                var intent = Intent(view.context, InfoActivity::class.java)
+                intent.putExtra("id",id.text)
+                intent.putExtra("name",name.text)
+                intent.putExtra("sprite",animated_sprites.drawable.toString())
+                intent.putExtra("type1",type1.drawable.toString())
+                intent.putExtra("type2", type2.drawable.toString())
+                view.context.startActivity(intent)
+                Toast.makeText(view.context,"${id.text} is clicked",Toast.LENGTH_SHORT).show()
                 }
         }
 
