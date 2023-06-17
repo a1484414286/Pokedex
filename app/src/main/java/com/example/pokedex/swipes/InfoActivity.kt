@@ -1,14 +1,12 @@
 package com.example.pokedex.swipes
 
-import Pokemon
 import android.os.Bundle
-import android.util.Log
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
+import com.bumptech.glide.Glide
 import com.example.pokedex.R
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.FirebaseApp
@@ -18,6 +16,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 
+@Suppress("UNCHECKED_CAST")
 class InfoActivity : AppCompatActivity() {
     private lateinit var viewPager : ViewPager2
     private lateinit var tabLayout: TabLayout
@@ -25,7 +24,6 @@ class InfoActivity : AppCompatActivity() {
 
     private lateinit var id : String
     private lateinit var name : String
-    private lateinit var sprite : String
     private lateinit var type1 : String
     private lateinit var type2 : String
 
@@ -56,7 +54,7 @@ class InfoActivity : AppCompatActivity() {
                 val stats = value["stats"] as Map<String, Long>
 
                 callback(
-                    abilities!!, base_exp!!,
+                    abilities!!, base_exp,
                     effort!! , moves, stats
                 )
             }
@@ -70,40 +68,44 @@ class InfoActivity : AppCompatActivity() {
     {
         id = intent.getStringExtra("id")!!
         name = intent.getStringExtra("name")!!
-        sprite = intent.getStringExtra("sprite")!!
         type1 = intent.getStringExtra("type1")!!
         type2 = intent.getStringExtra("type2") ?: ""
+
+
+
         id = id.replace("§","").trim()
 
-        findViewById<TextView>(R.id.pokedexPokemonName).text = name;
-        findViewById<TextView>(R.id.pokedexID).text = id;
+        findViewById<TextView>(R.id.pokedexPokemonName).text = name
+        findViewById<TextView>(R.id.pokedexID).text = id
+        val imageView = findViewById<ImageView>(R.id.pokedexAvatar)
 
-        loadDataFromDB(id.toInt()) { abilities, baseExp, effort, moves, stats ->
+        val drawableName = "p${id.toInt()}"
+        val drawableResourceId = resources.getIdentifier(drawableName, "drawable", packageName)
+
+        Glide.with(this)
+            .load(drawableResourceId)
+            .into(imageView)
+
+        loadDataFromDB(id.toInt()) { abilities, _, effort, moves, stats ->
             // update ui based on data called back from fetch
 
-            abilities?.let {
-                abilitiesList ->
-                for(ability in abilitiesList)
-                {
-                    val name = ability;
+            abilities.let { abilitiesList ->
+                for(ability in abilitiesList) {
+                    val name = ability
                     //load into ui
                 }
             }
 
-            effort?.let {
-                effortMap ->
-                for(key in effortMap.keys)
-                {
-                    val name = key;
+            effort.let { effortMap ->
+                for(key in effortMap.keys) {
+                    val name = key
                     val value = effortMap[key]?.toInt()
                 }
             }
 
-            moves?.let {
-                movesMap ->
-                for(key in movesMap.keys)
-                {
-                    val name = key;
+            moves.let { movesMap ->
+                for(key in movesMap.keys) {
+                    val name = key
                     val move = movesMap[key]
                     val accuracy = move?.get("accuracy")
                     val lvlReq = move?.get("lvl")
@@ -113,26 +115,23 @@ class InfoActivity : AppCompatActivity() {
                 }
             }
 
-            stats?.let {
-                statsMap ->
-                for(key in statsMap.keys)
-                {
-                    val name = key;
+            stats.let { statsMap ->
+                for(key in statsMap.keys) {
+                    val name = key
                     val value = statsMap[key]
                 }
             }
 
             // Use other retrieved values (baseExp, effort, moves, stats) as needed
         }
-        Toast.makeText(this, "$id $sprite",Toast.LENGTH_SHORT).show()
     }
+
+
 
     private fun tabsContentSwitch()
     {
 
-        var m = findViewById<ImageView>(R.id.pokemonAvatar)
-        m.setImageDrawable(getDrawable(R.drawable.p9))
-        var button = findViewById<ImageButton>(R.id.genderSwitch)
+        val button = findViewById<ImageButton>(R.id.genderSwitch)
         button.setImageDrawable(getDrawable(R.drawable.gender_switch))
         tabLayout = findViewById(R.id.tab_layout)
         viewPager = findViewById(R.id.view_pager)

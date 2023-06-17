@@ -3,11 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:id="@+id/constraintLayout"
+    >
 
 
     <ImageView
-        android:id="@+id/pokemonAvatar"
+        android:id="@+id/pokedexAvatar"
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:layout_marginTop="40dp"
@@ -25,8 +27,8 @@
         android:layout_marginTop="4dp"
         android:background="#FFFFFF"
         android:scaleType="fitCenter"
-        app:layout_constraintLeft_toRightOf="@id/pokemonAvatar"
-        app:layout_constraintTop_toTopOf="@id/pokemonAvatar" />
+        app:layout_constraintLeft_toRightOf="@id/pokedexAvatar"
+        app:layout_constraintTop_toTopOf="@id/pokedexAvatar" />
 
 
     <ImageButton
@@ -38,7 +40,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.4"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/pokemonAvatar" />
+        app:layout_constraintTop_toBottomOf="@id/pokedexAvatar" />
 
     <ImageButton
         android:id="@+id/type2"
@@ -49,7 +51,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.3"
         app:layout_constraintStart_toStartOf="@id/type1"
-        app:layout_constraintTop_toBottomOf="@id/pokemonAvatar" />
+        app:layout_constraintTop_toBottomOf="@id/pokedexAvatar" />
 
 
 
@@ -57,16 +59,16 @@
         android:id="@+id/pokedexPokemonName"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        app:layout_constraintEnd_toStartOf="@+id/pokemonAvatar"
+        app:layout_constraintEnd_toStartOf="@+id/pokedexAvatar"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/pokemonAvatar" />
+        app:layout_constraintTop_toTopOf="@id/pokedexAvatar" />
 
     <TextView
         android:id="@+id/pokedexID"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        app:layout_constraintEnd_toStartOf="@+id/pokemonAvatar"
+        app:layout_constraintEnd_toStartOf="@+id/pokedexAvatar"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toTopOf="@id/tab_layout"

@@ -67,14 +67,12 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
                 var intent = Intent(view.context, InfoActivity::class.java)
                 intent.putExtra("id",id.text)
                 intent.putExtra("name",name.text)
-                intent.putExtra("sprite",animated_sprites.drawable.toString())
                 intent.putExtra("type1",type1.drawable.toString())
                 view.context.startActivity(intent)
                 Toast.makeText(view.context,"${id.text} is clicked",Toast.LENGTH_SHORT).show()
             }
 
         }
-
 
     }
 
@@ -93,19 +91,29 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
             animated_sprites = view.findViewById(R.id.pokemonImage)
             type1 = view.findViewById(R.id.type1)
             type2 = view.findViewById(R.id.type2)
+
+
             view.setOnClickListener{
+
                 var intent = Intent(view.context, InfoActivity::class.java)
                 intent.putExtra("id",id.text)
                 intent.putExtra("name",name.text)
-                intent.putExtra("sprite",animated_sprites.drawable.toString())
-                intent.putExtra("type1",type1.drawable.toString())
+                intent.putExtra("type1", type1.drawable.toString())
                 intent.putExtra("type2", type2.drawable.toString())
                 view.context.startActivity(intent)
                 Toast.makeText(view.context,"${id.text} is clicked",Toast.LENGTH_SHORT).show()
                 }
         }
 
+        private fun getResourceId(itemView : View, drawable: Drawable): Int {
+            val resources = itemView.context.resources
+            val packageName = itemView.context.packageName
+
+            return resources.getIdentifier(drawable.toString(), "drawable", packageName)
+        }
+
     }
+
 
     private fun adjustRelativeLayoutSize(view: View, viewType: Int) {
         val displayMetrics = DisplayMetrics()
@@ -174,9 +182,11 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
                 viewHolderTwo.name.text = pokemonList[position].name
                 viewHolderTwo.type1.setImageDrawable(hashTable[pokemonList[position].type1]?.let { resizeImageToFit(context, it, 120, 50) })
                 viewHolderTwo.type2.setImageDrawable(hashTable[pokemonList[position].type2]?.let { resizeImageToFit(context, it, 120, 50) })
+                Log.e("RUNTIME", pokemonList[position].imageSource.toString())
                 Glide.with(viewHolderTwo.itemView)
                     .load(pokemonList[position].imageSource)
                     .into(viewHolderTwo.animated_sprites)
+
             }
 
         }
