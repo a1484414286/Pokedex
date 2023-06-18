@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="abilities" type="id">abilities</item>
-    <item name="ability1" type="id">ability1</item>
-    <item name="ability2" type="id">ability2</item>
+    <item name="abilities" type="id"></item>>
+    <item name="ability1" type="id"></item>
+    <item name="ability2" type="id"></item>
+    <item name="ability3" type="id" />
 </resources>

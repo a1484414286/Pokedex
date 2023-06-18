@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mainFrame"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".swipes.About">
+    tools:context=".swipes.About"
+    >
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/fragment_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -19,37 +22,117 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintVertical_bias="0" />
+<!--three abilities-->
 
-        <ImageView
-            android:id="@id/ability1"
+        <TextView
+            android:id="@id/ability3"
             android:layout_width="80dp"
             android:layout_height="50dp"
+            android:text="ability3"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/ability2"
+            app:layout_constraintStart_toEndOf="@+id/ability1"
             app:layout_constraintTop_toBottomOf="@id/abilities"
             app:layout_constraintVertical_bias="0.03" />
 
-        <ImageView
+
+        <TextView
+            android:id="@id/ability1"
+            android:layout_width="80dp"
+            android:layout_height="50dp"
+            android:text="ability1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/ability3"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/abilities"
+            app:layout_constraintVertical_bias="0.029" />
+
+        <TextView
             android:id="@id/ability2"
             android:layout_width="80dp"
             android:layout_height="50dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/ability1"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/ability3"
+            app:layout_constraintStart_toEndOf="@+id/ability1"
             app:layout_constraintTop_toBottomOf="@id/abilities"
             app:layout_constraintVertical_bias="0.03" />
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline"
+<!--Height, BaseEXP, Weight-->
+        <TextView
+            android:id="@+id/weightTag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_begin="20dp" />
+            android:text="Weight"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.3"
+            app:layout_constraintStart_toEndOf="@+id/baseEXPTag"
+            app:layout_constraintTop_toBottomOf="@+id/ability3"
+            app:layout_constraintVertical_bias="0.1" />
+
+        <TextView
+            android:id="@+id/heightTag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Height"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ability1"
+            app:layout_constraintVertical_bias="0.1" />
+
+        <TextView
+            android:id="@+id/baseEXPTag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Base EXP"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ability2"
+            app:layout_constraintVertical_bias="0.1" />
+
+<!--Text View associate with tags-->
+        <TextView
+            android:layout_width="50dp"
+            android:layout_height="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/heightTag"
+            app:layout_constraintVertical_bias="0.1" />
+
+
+        <TextView
+            android:layout_width="50dp"
+            android:layout_height="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/baseEXPTag"
+            app:layout_constraintVertical_bias="0.1" />
+
+        <TextView
+            android:id="@+id/weightText"
+            android:layout_width="50dp"
+            android:layout_height="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.75"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/weightTag"
+            app:layout_constraintVertical_bias="0.1" />
+
+
+
+
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
-    <!-- TODO: Update blank fragment layout -->
-
-
-
 </FrameLayout>

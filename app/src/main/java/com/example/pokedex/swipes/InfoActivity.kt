@@ -1,6 +1,9 @@
 package com.example.pokedex.swipes
 
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.text.SpannableStringBuilder
+import android.text.style.StyleSpan
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -15,6 +18,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import java.lang.StringBuilder
 
 @Suppress("UNCHECKED_CAST")
 class InfoActivity : AppCompatActivity() {
@@ -40,7 +44,8 @@ class InfoActivity : AppCompatActivity() {
 
 
 
-    private fun loadDataFromDB(index: Int, callback: (abilities: Map<String,Boolean>, base_exp : Int, effort : Map<String,Long>, moves : Map<String,Map<String, Any>>, stats : Map<String,Long>)-> Unit) {
+    private fun loadDataFromDB(index: Int, callback: (abilities: Map<String,Boolean>, base_exp : Int, effort : Map<String,Long>, moves : Map<String,Map<String, Any>>, stats : Map<String,Long>,
+    height : Int, weight : Int)-> Unit) {
         val myRef = database.getReference("$index")
 
         myRef.addValueEventListener(object : ValueEventListener {
@@ -52,10 +57,11 @@ class InfoActivity : AppCompatActivity() {
                 val effort = value["effort"] as? Map<String, Long>
                 val moves = value["moves"] as Map<String, Map<String, Any>>
                 val stats = value["stats"] as Map<String, Long>
-
+                val height = value["height"] as Int
+                val weight = value["weight"] as Int
                 callback(
                     abilities!!, base_exp,
-                    effort!! , moves, stats
+                    effort!! , moves, stats, height, weight
                 )
             }
 
@@ -64,31 +70,24 @@ class InfoActivity : AppCompatActivity() {
             }
         })
     }
+    @SuppressLint("SetTextI18n")
     private fun receiveDataFromPreviousActivity()
     {
         id = intent.getStringExtra("id")!!
         name = intent.getStringExtra("name")!!
         type1 = intent.getStringExtra("type1")!!
         type2 = intent.getStringExtra("type2") ?: ""
-
-
-
         id = id.replace("§","").trim()
-
-        findViewById<TextView>(R.id.pokedexPokemonName).text = name
-        findViewById<TextView>(R.id.pokedexID).text = id
         val imageView = findViewById<ImageView>(R.id.pokedexAvatar)
-
+        findViewById<TextView>(R.id.pokedexID).text = "§  ${this.id}"
+        findViewById<TextView>(R.id.pokedexPokemonName).text = name
         val drawableName = "p${id.toInt()}"
         val drawableResourceId = resources.getIdentifier(drawableName, "drawable", packageName)
-
         Glide.with(this)
             .load(drawableResourceId)
             .into(imageView)
-
-        loadDataFromDB(id.toInt()) { abilities, _, effort, moves, stats ->
+        loadDataFromDB(id.toInt()) { abilities, _, effort, moves, stats, height, weight->
             // update ui based on data called back from fetch
-
             abilities.let { abilitiesList ->
                 for(ability in abilitiesList) {
                     val name = ability
@@ -121,6 +120,7 @@ class InfoActivity : AppCompatActivity() {
                     val value = statsMap[key]
                 }
             }
+
 
             // Use other retrieved values (baseExp, effort, moves, stats) as needed
         }
