@@ -13,6 +13,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.codepath.asynchttpclient.AsyncHttpClient
 import com.codepath.asynchttpclient.RequestParams
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler
+import com.example.pokedex.evolution.EvolutionData
 import com.example.pokedex.swipes.PageAdapter
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.FirebaseApp
@@ -28,6 +29,7 @@ import okhttp3.Headers
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.*
+import java.util.regex.Pattern
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
@@ -153,219 +155,289 @@ class MainActivity : AppCompatActivity() {
         return map;
 
     }
+    fun linkPokemonEvolutions(evolutionDataList: List<EvolutionData>) {
+        for (element in evolutionDataList) {
+            val pokemonId = element.id
 
+            // Create a new child reference for the Pokemon ID
+            val pokemonChildRef = database.getReference(pokemonId)
+
+            // Create a map for the Pokemon's data
+            val pokemonData = hashMapOf<String, Any>()
+
+            // Add the evolution data for each Pokemon ID
+            for (evolutionData in evolutionDataList) {
+                pokemonData[evolutionData.id] = hashMapOf(
+                    "name" to evolutionData.name,
+                    "isBaby" to evolutionData.isBaby,
+                    "minLevel" to evolutionData.minLevel,
+                    "trigger" to evolutionData.trigger
+                    // Add more fields as needed
+                )
+            }
+
+            // Set the data for the Pokemon
+            pokemonChildRef.setValue(pokemonData)
+        }
+    }
     private fun fetchData(){
         val client = AsyncHttpClient()
         val params = RequestParams()
+        val flag = false;
         params["limit"] = "5"
         params["page"] = "0"
 //        val randomValue = (0..1009).random()
-        var index = 1
-        while(index != 10) {
+        var index = 0
+        while(index != 3) {
             var map = hashMapSetUp();
 
             client.run {
 
-            get(/* url = */"https://pokeapi.co/api/v2/evolution-chain/1",
-                object : JsonHttpResponseHandler()
+                get(/* url = */"https://pokeapi.co/api/v2/evolution-chain/$index",
+                    object : JsonHttpResponseHandler()
+                    {
+                        override fun onFailure(
+                            statusCode: Int,
+                            headers: Headers?,
+                            response: String?,
+                            throwable: Throwable?
+                        ) {
+                            Log.e("ERROR", "SOMETHING WENT WRONG")
+                        }
+
+                        override fun onSuccess(statusCode: Int, headers: Headers?, json: JsonHttpResponseHandler.JSON) {
+
+                            val jsonList = json.jsonObject
+                            val chain = jsonList.getJSONObject("chain")
+                            var tempArr: JSONObject? = chain
+
+                            val pattern = Pattern.compile("/(\\d+)/$")
+                            val matcher = pattern.matcher("")
+                            val evolutionDataList = mutableListOf<EvolutionData>()
+
+                            while (tempArr != null) {
+                                val species = tempArr.getJSONObject("species")
+                                val speciesUrl = species.getString("url")
+                                matcher.reset(speciesUrl)
+                                val speciesId = if (matcher.find()) matcher.group(1) else ""
+                                val speciesName = species.getString("name")
+
+                                val isBaby = tempArr.getBoolean("is_baby")
+
+                                val evolutionDetails = tempArr.getJSONArray("evolution_details")
+                                if (evolutionDetails.length() > 0) {
+                                    val firstEvolution = evolutionDetails.getJSONObject(0)
+                                    // Extract the required details from the firstEvolution object
+                                    val minLevel = firstEvolution.getInt("min_level")
+                                    val trigger = firstEvolution.getJSONObject("trigger").getString("name")
+                                    // Add more fields as needed
+
+                                    val evolutionData = EvolutionData(
+                                        id = speciesId,
+                                        name = speciesName,
+                                        isBaby = isBaby,
+                                        minLevel = minLevel,
+                                        trigger = trigger
+                                        // Initialize more fields as needed
+                                    )
+                                    evolutionDataList.add(evolutionData)
+                                } else {
+                                    val evolutionData = EvolutionData(
+                                        id = speciesId,
+                                        name = speciesName,
+                                        isBaby = isBaby,
+                                        minLevel = 0,
+                                        trigger = ""
+                                        // Initialize more fields as needed
+                                    )
+                                    evolutionDataList.add(evolutionData)
+                                }
+
+                                val evolvesTo = tempArr.getJSONArray("evolves_to")
+                                if (evolvesTo.length() > 0) {
+                                    tempArr = evolvesTo.getJSONObject(0)
+                                } else {
+                                    tempArr = null
+                                }
+                            }
+
+                            linkPokemonEvolutions(evolutionDataList)
+
+                        }
+
+                    }
+                )
+
+                if(flag == true)
                 {
+
+                get("https://pokeapi.co/api/v2/pokemon/$index", object : JsonHttpResponseHandler() {
+                    override fun onSuccess(
+                        statusCode: Int,
+                        headers: Headers,
+                        json: JsonHttpResponseHandler.JSON
+                    ) {
+                        var jsonList = json.jsonObject
+                        val myRef = database.getReference(jsonList.get("id").toString())
+
+                        val jsonArr: JSONArray = jsonList.get("abilities") as JSONArray
+                        var abilitiesMap = map["abilities"] as HashMap<String, Boolean>;
+                        for (i in 0 until jsonArr.length()) {
+                            val abilities = jsonArr.get(i) as JSONObject
+                            val ability = abilities.get("ability") as JSONObject
+                            val hidden = abilities.get("is_hidden") as Boolean
+                            val name = ability.get("name") as String
+                            abilitiesMap[name] = hidden
+                        }
+
+                        val types = jsonList.get("types") as JSONArray;
+                        var typesArr = map["types"] as ArrayList<String>;
+                        for (i in 0 until types.length()) {
+                            val typeSlots = types.get(i) as JSONObject
+                            val type = typeSlots.get("type") as JSONObject
+                            val typeName = type.get("name") as String
+                            typesArr.add(typeName)
+                        }
+
+                        map["base_exp"] = jsonList.get("base_experience")
+                        map["name"] = jsonList.get("name")
+
+                        map["height"] = jsonList.get("height")
+                        map["weight"] = jsonList.get("weight")
+                        val statsArr = jsonList.get("stats") as JSONArray;
+                        val stats: HashMap<String, Int> = map["stats"] as HashMap<String, Int>
+                        val effort: HashMap<String, Int> = map["effort"] as HashMap<String, Int>;
+                        for (i in 0 until statsArr.length()) {
+                            val genStats = statsArr.get(i) as JSONObject
+                            val value = genStats.get("base_stat") as Int
+                            val baseStats = genStats.get("stat") as JSONObject
+                            val baseStatsName = baseStats.get("name") as String
+                            stats[baseStatsName] = value
+                            val effortVal = genStats.get("effort") as Int
+                            effort[baseStatsName] = effortVal
+                        }
+
+
+                        val moves = jsonList.getJSONArray("moves")
+                        val movesMap = map["moves"] as HashMap<String, Any>
+                        val totalMoves = moves.length()
+                        var completedMoves = 0
+
+                        for (i in 0 until moves.length()) {
+                            val move = moves.getJSONObject(i).getJSONObject("move")
+                            val moveName = move.getString("name")
+                            val versionGroupDetails =
+                                moves.getJSONObject(i).getJSONArray("version_group_details")
+
+                            for (j in 0 until versionGroupDetails.length()) {
+                                val moveSetTypes = versionGroupDetails.getJSONObject(j)
+                                val moveLearnMethod =
+                                    moveSetTypes.getJSONObject("move_learn_method")
+                                val moveLearnName = moveLearnMethod.getString("name")
+
+                                if (moveLearnName == "level-up" ) {
+                                    // Create a new HashMap for moveStatsMap
+                                    val moveStatsMap = HashMap<String, Any>()
+                                    moveStatsMap["accuracy"] = 0
+                                    moveStatsMap["power"] = 0
+                                    moveStatsMap["type"] = 0
+                                    moveStatsMap["pp"] = 0
+                                    moveStatsMap["lvl"] = 0
+
+                                    // Add moveStatsMap to movesMap
+                                    movesMap[moveName] = moveStatsMap
+
+                                    // Make the HTTP request
+                                    val url = move.getString("url").toString()
+                                    get(move.getString("url"), object : JsonHttpResponseHandler() {
+                                        override fun onFailure(
+                                            statusCode: Int,
+                                            headers: Headers?,
+                                            response: String?,
+                                            throwable: Throwable?
+                                        ) {
+                                            // Handle the failure
+
+                                            // Update the completion counter
+                                            synchronized(this) {
+                                                completedMoves++
+                                                checkCompletion(
+                                                    totalMoves,
+                                                    completedMoves,
+                                                    movesMap
+                                                )
+                                            }
+                                        }
+
+                                        override fun onSuccess(
+                                            statusCode: Int,
+                                            headers: Headers?,
+                                            json: JsonHttpResponseHandler.JSON
+                                        ) {
+                                            jsonList = json.jsonObject
+                                            Log.e("RUNTIME", jsonList.toString())
+                                            var accuracy =
+                                                jsonList.get("accuracy")
+                                            val dmg_class =
+                                                jsonList.get("damage_class") as JSONObject
+                                            val dmgType = dmg_class.get("name")
+                                            var pp = jsonList.get("pp")
+                                            var power = jsonList.get("power")
+                                            // Update moveStatsMap
+                                            if (accuracy is JSONObject || accuracy.equals(
+                                                    null
+                                                )
+                                            ) {
+                                                accuracy = 100
+                                            }
+                                            if (power is JSONObject || power.equals(
+                                                    null
+                                                )
+                                            ) {
+                                                power = 0;
+                                            }
+                                            if (pp is JSONObject || pp.equals(
+                                                    null
+                                                )
+                                            ) {
+                                                pp = 0;
+                                            }
+                                            moveStatsMap["accuracy"] = accuracy
+                                            moveStatsMap["type"] = dmgType
+                                            moveStatsMap["pp"] = pp
+                                            moveStatsMap["power"] = power
+                                            myRef.updateChildren(map)
+
+
+                                            // Update the completion counter
+                                            synchronized(this) {
+                                                completedMoves++
+                                                checkCompletion(
+                                                    totalMoves,
+                                                    completedMoves,
+                                                    movesMap
+                                                )
+                                            }
+                                        }
+                                    })
+                                }
+                            }
+
+
+                        }
+////                        Log.e("PONISSAN", movesMap.toString())
+                    }
+
                     override fun onFailure(
                         statusCode: Int,
                         headers: Headers?,
-                        response: String?,
+                        errorResponse: String,
                         throwable: Throwable?
                     ) {
-                        TODO("Not yet implemented")
+                        Log.d("ID not found Error", index.toString())
                     }
-
-                    override fun onSuccess(statusCode: Int, headers: Headers?, json: JsonHttpResponseHandler.JSON) {
-                        val jsonList = json.jsonObject;
-                        val chain = jsonList.get("chain") as JSONObject
-                        val evolvesTo = chain.get("evolves_to") as JSONArray
-//                        while(evolvesTo.length() != 0)
-//                        {
-                            Log.e("RUNTIME", evolvesTo.toString())
-//                            evolvesTo = evolvesTo.get("evolves_to") as JSONObject
-//                        }
-//                        for(i in jsonList.keys())
-//                        {
-//                            Log.e("RUNTIME", i)
-//                        }
-//                        val chain : JSONObject = jsonList.get("chain") as JSONObject
-//                        val evolvesTo : JSONArray = chain.get("evolves_to") as JSONArray
-//                        val evolutionDetails = evolvesTo.get(0) as JSONObject
-//                        Log.e("RUNTIME", evolutionDetails.get("species").toString())
-//                        Log.e("RUNTIME", evolvesTo.toString())
-
-                    }
-
+                })
                 }
-            )
-
-//                get("https://pokeapi.co/api/v2/pokemon/$index", object : JsonHttpResponseHandler() {
-//                    override fun onSuccess(
-//                        statusCode: Int,
-//                        headers: Headers,
-//                        json: JsonHttpResponseHandler.JSON
-//                    ) {
-//                        val jsonList = json.jsonObject
-//                        val myRef = database.getReference(jsonList.get("id").toString())
-//
-//                        val jsonArr: JSONArray = jsonList.get("abilities") as JSONArray
-//                        var abilitiesMap = map["abilities"] as HashMap<String, Boolean>;
-//                        for (i in 0 until jsonArr.length()) {
-//                            val abilities = jsonArr.get(i) as JSONObject
-//                            val ability = abilities.get("ability") as JSONObject
-//                            val hidden = abilities.get("is_hidden") as Boolean
-//                            val name = ability.get("name") as String
-//                            abilitiesMap[name] = hidden
-//                        }
-//
-//                        val types = jsonList.get("types") as JSONArray;
-//                        var typesArr = map["types"] as ArrayList<String>;
-//                        for (i in 0 until types.length()) {
-//                            val typeSlots = types.get(i) as JSONObject
-//                            val type = typeSlots.get("type") as JSONObject
-//                            val typeName = type.get("name") as String
-//                            typesArr.add(typeName)
-//                        }
-//
-//                        map["base_exp"] = jsonList.get("base_experience")
-//                        map["name"] = jsonList.get("name")
-//
-//                        map["height"] = jsonList.get("height")
-//                        map["weight"] = jsonList.get("weight")
-//                        val statsArr = jsonList.get("stats") as JSONArray;
-//                        val stats: HashMap<String, Int> = map["stats"] as HashMap<String, Int>
-//                        val effort: HashMap<String, Int> = map["effort"] as HashMap<String, Int>;
-//                        for (i in 0 until statsArr.length()) {
-//                            val genStats = statsArr.get(i) as JSONObject
-//                            val value = genStats.get("base_stat") as Int
-//                            val baseStats = genStats.get("stat") as JSONObject
-//                            val baseStatsName = baseStats.get("name") as String
-//                            stats[baseStatsName] = value
-//                            val effortVal = genStats.get("effort") as Int
-//                            effort[baseStatsName] = effortVal
-//                        }
-//
-//
-//                        val moves = jsonList.getJSONArray("moves")
-//                        val movesMap = map["moves"] as HashMap<String, Any>
-//                        val totalMoves = moves.length()
-//                        var completedMoves = 0
-//
-//                        for (i in 0 until moves.length()) {
-//                            val move = moves.getJSONObject(i).getJSONObject("move")
-//                            val moveName = move.getString("name")
-//                            val versionGroupDetails =
-//                                moves.getJSONObject(i).getJSONArray("version_group_details")
-//
-//                            for (j in 0 until versionGroupDetails.length()) {
-//                                val moveSetTypes = versionGroupDetails.getJSONObject(j)
-//                                val moveLearnMethod =
-//                                    moveSetTypes.getJSONObject("move_learn_method")
-//                                val moveLearnName = moveLearnMethod.getString("name")
-//
-//                                if (moveLearnName == "level-up" ) {
-//                                    // Create a new HashMap for moveStatsMap
-//                                    val moveStatsMap = HashMap<String, Any>()
-//                                    moveStatsMap["accuracy"] = 0
-//                                    moveStatsMap["power"] = 0
-//                                    moveStatsMap["type"] = 0
-//                                    moveStatsMap["pp"] = 0
-//                                    moveStatsMap["lvl"] = 0
-//
-//                                    // Add moveStatsMap to movesMap
-//                                    movesMap[moveName] = moveStatsMap
-//
-//                                    // Make the HTTP request
-//                                    val url = move.getString("url").toString()
-//                                    get(move.getString("url"), object : JsonHttpResponseHandler() {
-//                                        override fun onFailure(
-//                                            statusCode: Int,
-//                                            headers: Headers?,
-//                                            response: String?,
-//                                            throwable: Throwable?
-//                                        ) {
-//                                            // Handle the failure
-//
-//                                            // Update the completion counter
-//                                            synchronized(this) {
-//                                                completedMoves++
-//                                                checkCompletion(
-//                                                    totalMoves,
-//                                                    completedMoves,
-//                                                    movesMap
-//                                                )
-//                                            }
-//                                        }
-//
-//                                        override fun onSuccess(
-//                                            statusCode: Int,
-//                                            headers: Headers?,
-//                                            json: JsonHttpResponseHandler.JSON
-//                                        ) {
-//                                            var accuracy =
-//                                                jsonList.get("accuracy")
-//                                            val dmg_class =
-//                                                jsonList.get("damage_class") as JSONObject
-//                                            val dmgType = dmg_class.get("name")
-//                                            var pp = jsonList.get("pp")
-//                                            var power = jsonList.get("power")
-//                                            // Update moveStatsMap
-//                                            if (accuracy is JSONObject || accuracy.equals(
-//                                                    null
-//                                                )
-//                                            ) {
-//                                                accuracy = 100
-//                                            }
-//                                            if (power is JSONObject || power.equals(
-//                                                    null
-//                                                )
-//                                            ) {
-//                                                power = 0;
-//                                            }
-//                                            if (pp is JSONObject || pp.equals(
-//                                                    null
-//                                                )
-//                                            ) {
-//                                                pp = 0;
-//                                            }
-//                                            moveStatsMap["accuracy"] = accuracy
-//                                            moveStatsMap["type"] = dmgType
-//                                            moveStatsMap["pp"] = pp
-//                                            moveStatsMap["power"] = power
-//                                            myRef.setValue(map)
-//
-//
-//                                            // Update the completion counter
-//                                            synchronized(this) {
-//                                                completedMoves++
-//                                                checkCompletion(
-//                                                    totalMoves,
-//                                                    completedMoves,
-//                                                    movesMap
-//                                                )
-//                                            }
-//                                        }
-//                                    })
-//                                }
-//                            }
-//
-//
-//                        }
-////                        Log.e("PONISSAN", movesMap.toString())
-//                    }
-
-//                    override fun onFailure(
-//                        statusCode: Int,
-//                        headers: Headers?,
-//                        errorResponse: String,
-//                        throwable: Throwable?
-//                    ) {
-//                        Log.d("ID not found Error", index.toString())
-//                    }
-//                })
 
             }
 
