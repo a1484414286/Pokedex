@@ -57,8 +57,8 @@ class InfoActivity : AppCompatActivity() {
                 val effort = value["effort"] as? Map<String, Long>
                 val moves = value["moves"] as Map<String, Map<String, Any>>
                 val stats = value["stats"] as Map<String, Long>
-                val height = value["height"] as Int
-                val weight = value["weight"] as Int
+                val height = (value["height"] as Long).toInt()
+                val weight = (value["weight"] as Long).toInt()
                 callback(
                     abilities!!, base_exp,
                     effort!! , moves, stats, height, weight

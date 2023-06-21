@@ -3,19 +3,14 @@ package com.example.pokedex
 import Pokemon
 import android.os.Bundle
 import android.util.Log
-import android.widget.ImageButton
-import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager2.widget.ViewPager2
 import com.codepath.asynchttpclient.AsyncHttpClient
 import com.codepath.asynchttpclient.RequestParams
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler
 import com.example.pokedex.evolution.EvolutionData
-import com.example.pokedex.swipes.PageAdapter
-import com.google.android.material.tabs.TabLayout
 import com.google.firebase.FirebaseApp
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -43,9 +38,8 @@ class MainActivity : AppCompatActivity() {
         FirebaseApp.initializeApp(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-//        addData()
-//        pokemonRecyclerViewSetup()
-        fetchData();
+        pokemonRecyclerViewSetup()
+//        fetchData();
 //        deleteData()
 
     }
@@ -152,10 +146,11 @@ class MainActivity : AppCompatActivity() {
         map["moves"] = HashMap<Any, Any>();
         map["effort"] = HashMap<String, Int>();
         map["moves"] = HashMap<String, HashMap<String, Any>>();
+//        map["evolution"] = HashMap<Any,Any>();
         return map;
 
     }
-    fun linkPokemonEvolutions(evolutionDataList: List<EvolutionData>) {
+    fun linkPokemonEvolutions(evolutionDataList: List<EvolutionData>, map: HashMap<String, Any>) {
         for (element in evolutionDataList) {
             val pokemonId = element.id
 
@@ -175,23 +170,27 @@ class MainActivity : AppCompatActivity() {
                     // Add more fields as needed
                 )
             }
+            map["evolution"] = pokemonData
 
             // Set the data for the Pokemon
-            pokemonChildRef.setValue(pokemonData)
+            pokemonChildRef.setValue(map)
         }
     }
     private fun fetchData(){
         val client = AsyncHttpClient()
         val params = RequestParams()
-        val flag = false;
+        val flag = true;
+        val movesFlag = true;
         params["limit"] = "5"
         params["page"] = "0"
 //        val randomValue = (0..1009).random()
-        var index = 0
-        while(index != 3) {
-            var map = hashMapSetUp();
+        var index = 200
+        while(index != 400) {
+            val map = hashMapSetUp();
 
             client.run {
+
+                if(!flag){
 
                 get(/* url = */"https://pokeapi.co/api/v2/evolution-chain/$index",
                     object : JsonHttpResponseHandler()
@@ -228,7 +227,11 @@ class MainActivity : AppCompatActivity() {
                                 if (evolutionDetails.length() > 0) {
                                     val firstEvolution = evolutionDetails.getJSONObject(0)
                                     // Extract the required details from the firstEvolution object
-                                    val minLevel = firstEvolution.getInt("min_level")
+                                    val minLevel = if (firstEvolution.isNull("min_level")) {
+                                        0 // Default value when "min_level" is null
+                                    } else {
+                                        firstEvolution.getInt("min_level")
+                                    }
                                     val trigger = firstEvolution.getJSONObject("trigger").getString("name")
                                     // Add more fields as needed
 
@@ -252,7 +255,6 @@ class MainActivity : AppCompatActivity() {
                                     )
                                     evolutionDataList.add(evolutionData)
                                 }
-
                                 val evolvesTo = tempArr.getJSONArray("evolves_to")
                                 if (evolvesTo.length() > 0) {
                                     tempArr = evolvesTo.getJSONObject(0)
@@ -261,14 +263,15 @@ class MainActivity : AppCompatActivity() {
                                 }
                             }
 
-                            linkPokemonEvolutions(evolutionDataList)
+                            linkPokemonEvolutions(evolutionDataList,map)
 
                         }
 
                     }
                 )
+                }
 
-                if(flag == true)
+                if(flag)
                 {
 
                 get("https://pokeapi.co/api/v2/pokemon/$index", object : JsonHttpResponseHandler() {
@@ -299,7 +302,13 @@ class MainActivity : AppCompatActivity() {
                             typesArr.add(typeName)
                         }
 
-                        map["base_exp"] = jsonList.get("base_experience")
+                        val minLevel = if (jsonList.isNull("base_experience")) {
+                            0 // Default value when "min_level" is null
+                        } else {
+                            jsonList.get("base_experience")
+                        }
+                        map["base_exp"] = minLevel
+
                         map["name"] = jsonList.get("name")
 
                         map["height"] = jsonList.get("height")
@@ -316,6 +325,10 @@ class MainActivity : AppCompatActivity() {
                             val effortVal = genStats.get("effort") as Int
                             effort[baseStatsName] = effortVal
                         }
+                        Log.e("RUNTIME",map.toString())
+//                        myRef.setValue(map);
+                        if(movesFlag)
+                        {
 
 
                         val moves = jsonList.getJSONArray("moves")
@@ -422,10 +435,10 @@ class MainActivity : AppCompatActivity() {
                                     })
                                 }
                             }
+                        }
 
 
                         }
-////                        Log.e("PONISSAN", movesMap.toString())
                     }
 
                     override fun onFailure(
