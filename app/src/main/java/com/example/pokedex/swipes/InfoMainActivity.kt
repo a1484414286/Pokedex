@@ -2,15 +2,17 @@ package com.example.pokedex.swipes
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.text.SpannableStringBuilder
-import android.text.style.StyleSpan
+import android.util.Log
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.example.pokedex.R
+import com.example.pokedex.evolution.EvolutionAdapter
+import com.example.pokedex.evolution.PokeEvo
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.FirebaseApp
 import com.google.firebase.database.DataSnapshot
@@ -18,13 +20,16 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import java.lang.StringBuilder
 
 @Suppress("UNCHECKED_CAST")
-class InfoActivity : AppCompatActivity() {
+class InfoMainActivity : AppCompatActivity() {
     private lateinit var viewPager : ViewPager2
     private lateinit var tabLayout: TabLayout
     private lateinit var pageAdapter : PageAdapter
+
+    private lateinit var evolutionRecyclerView : RecyclerView
+    private lateinit var evolutionAdapter : EvolutionAdapter
+    private lateinit var evolutionList : MutableList<PokeEvo>
 
     private lateinit var id : String
     private lateinit var name : String
@@ -43,9 +48,14 @@ class InfoActivity : AppCompatActivity() {
     }
 
 
+    private fun evolutionSetUp()
+    {
+
+    }
+
 
     private fun loadDataFromDB(index: Int, callback: (abilities: Map<String,Boolean>, base_exp : Int, effort : Map<String,Long>, moves : Map<String,Map<String, Any>>, stats : Map<String,Long>,
-    height : Int, weight : Int)-> Unit) {
+    height : Int, weight : Int, evolutionMap : Any)-> Unit) {
         val myRef = database.getReference("$index")
 
         myRef.addValueEventListener(object : ValueEventListener {
@@ -59,9 +69,17 @@ class InfoActivity : AppCompatActivity() {
                 val stats = value["stats"] as Map<String, Long>
                 val height = (value["height"] as Long).toInt()
                 val weight = (value["weight"] as Long).toInt()
+                val evolutionMap : Any;
+                evolutionMap = if(index < 4) {
+                    value["evolution"] as ArrayList<Any>;
+
+                } else {
+                    value["evolution"] as HashMap<Int,Any>;
+                }
+
                 callback(
                     abilities!!, base_exp,
-                    effort!! , moves, stats, height, weight
+                    effort!! , moves, stats, height, weight, evolutionMap
                 )
             }
 
@@ -83,10 +101,12 @@ class InfoActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.pokedexPokemonName).text = name
         val drawableName = "p${id.toInt()}"
         val drawableResourceId = resources.getIdentifier(drawableName, "drawable", packageName)
+        Log.e("RUNTIME",id.toString())
+
         Glide.with(this)
             .load(drawableResourceId)
             .into(imageView)
-        loadDataFromDB(id.toInt()) { abilities, _, effort, moves, stats, height, weight->
+        loadDataFromDB(id.toInt()) { abilities, _, effort, moves, stats, height, weight, evolutionMap->
             // update ui based on data called back from fetch
             abilities.let { abilitiesList ->
                 for(ability in abilitiesList) {
@@ -120,6 +140,26 @@ class InfoActivity : AppCompatActivity() {
                     val value = statsMap[key]
                 }
             }
+
+
+            if(evolutionMap is HashMap<*,*>)
+            {
+                Log.e("RUNTIME", "id = ${evolutionMap.keys}")
+            }
+
+            else if(evolutionMap is ArrayList<*>)
+            {
+                for(i in 0 until evolutionMap.size)
+                {
+                    Log.e("RUNTIME", "id = $i, info : ${evolutionMap.get(i)}")
+                }
+
+            }
+//            for(i in evolutionMap)
+//            {
+//                Log.e("RUNTIME",i.toString())
+//            }
+
 
 
             // Use other retrieved values (baseExp, effort, moves, stats) as needed

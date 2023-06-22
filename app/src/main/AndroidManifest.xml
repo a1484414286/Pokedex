@@ -28,7 +28,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".swipes.InfoActivity">
+        <activity android:name=".swipes.InfoMainActivity">
 
         </activity>
         <meta-data

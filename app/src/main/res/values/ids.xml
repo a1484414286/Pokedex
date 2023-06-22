@@ -4,4 +4,6 @@
     <item name="ability1" type="id"></item>
     <item name="ability2" type="id"></item>
     <item name="ability3" type="id" />
+    <item name="weaknessTag" type="id" />
+    <item name="evolutionTag" type="id" />
 </resources>

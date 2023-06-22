@@ -1,4 +1,4 @@
-package com.example.pokedex
+package com.example.pokedex.main
 
 
 import Pokemon
@@ -22,7 +22,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.pokedex.swipes.InfoActivity
+import com.example.pokedex.R
+import com.example.pokedex.swipes.InfoMainActivity
 
 
 class PokedexAdapter (private val context: Context, private val pokemonList : List<Pokemon>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -64,7 +65,7 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
             animated_sprites = view.findViewById(R.id.pokemonImage)
             type1 = view.findViewById(R.id.type1)
             view.setOnClickListener{
-                var intent = Intent(view.context, InfoActivity::class.java)
+                var intent = Intent(view.context, InfoMainActivity::class.java)
                 intent.putExtra("id",id.text)
                 intent.putExtra("name",name.text)
                 intent.putExtra("type1",type1.drawable.toString())
@@ -95,7 +96,7 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
 
             view.setOnClickListener{
 
-                var intent = Intent(view.context, InfoActivity::class.java)
+                var intent = Intent(view.context, InfoMainActivity::class.java)
                 intent.putExtra("id",id.text)
                 intent.putExtra("name",name.text)
                 intent.putExtra("type1", type1.drawable.toString())
@@ -128,15 +129,12 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
             val relativeLayout = view.findViewById<RelativeLayout>(R.id.singleItemLayout)
             val layoutParams = RelativeLayout.LayoutParams(itemWidth, itemHeight)
             relativeLayout.layoutParams = layoutParams
-            relativeLayout.isClickable = false
         }
         else
         {
             val relativeLayout = view.findViewById<RelativeLayout>(R.id.doubleItemLayout)
             val layoutParams = RelativeLayout.LayoutParams(itemWidth, itemHeight)
             relativeLayout.layoutParams = layoutParams
-            relativeLayout.isClickable = false
-
         }
 
     }
