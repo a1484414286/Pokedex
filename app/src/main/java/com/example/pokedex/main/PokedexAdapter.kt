@@ -23,7 +23,7 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.pokedex.R
-import com.example.pokedex.swipes.InfoMainActivity
+import com.example.pokedex.InfoMainActivity
 
 
 class PokedexAdapter (private val context: Context, private val pokemonList : List<Pokemon>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -141,7 +141,7 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-
+        Log.e("RUNTIME","CREATED")
         val view = when (viewType) {
             ITEM_TYPE_ONE -> inflater.inflate(R.layout.single_type_pokemon, parent, false)
             ITEM_TYPE_TWO -> inflater.inflate(R.layout.duo_type_pokemon, parent, false)

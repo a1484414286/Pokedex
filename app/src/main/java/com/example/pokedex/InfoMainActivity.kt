@@ -1,4 +1,4 @@
-package com.example.pokedex.swipes
+package com.example.pokedex
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -7,12 +7,11 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
-import com.example.pokedex.R
-import com.example.pokedex.evolution.EvolutionAdapter
 import com.example.pokedex.evolution.PokeEvo
+import com.example.pokedex.swipes.About
+import com.example.pokedex.swipes.PageAdapter
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.FirebaseApp
 import com.google.firebase.database.DataSnapshot
@@ -21,21 +20,19 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 
+
 @Suppress("UNCHECKED_CAST")
 class InfoMainActivity : AppCompatActivity() {
     private lateinit var viewPager : ViewPager2
     private lateinit var tabLayout: TabLayout
     private lateinit var pageAdapter : PageAdapter
-
-    private lateinit var evolutionRecyclerView : RecyclerView
-    private lateinit var evolutionAdapter : EvolutionAdapter
-    private lateinit var evolutionList : MutableList<PokeEvo>
+    private lateinit var evolutionList : ArrayList<PokeEvo>
 
     private lateinit var id : String
     private lateinit var name : String
     private lateinit var type1 : String
     private lateinit var type2 : String
-
+    private lateinit var aboutFragment : About
     private val database = Firebase.database
 
 
@@ -43,29 +40,38 @@ class InfoMainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
         setContentView(R.layout.status_page)
-        tabsContentSwitch()
-        receiveDataFromPreviousActivity()
-        evolutionSetUp()
-    }
-
-
-    @SuppressLint("InflateParams")
-    private fun evolutionSetUp() {
-        val fragmentAboutView = layoutInflater.inflate(R.layout.fragment_about, null)
-        val evolutionRecyclerView = fragmentAboutView.findViewById<RecyclerView>(R.id.recyclerViewEvolution)
-
         evolutionList = ArrayList()
-        evolutionAdapter = EvolutionAdapter(evolutionList)
-        evolutionRecyclerView.adapter = evolutionAdapter
-
-        // Use the evolutionRecyclerView as needed
+        receiveDataFromPreviousActivity()
+        tabsContentSwitch()
     }
 
+//    private fun evolutionSetup()
+//    {
+//        val fragment: Fragment? = supportFragmentManager.findFragmentById(R.id.fragment_container)
+//
+//        val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
+//
+//        fragment?.let { transaction.replace(R.id.fragment_container, it) }
+//
+//        transaction.commit()
+//        val rootView = findViewById<FrameLayout>(R.id.fragment_container)
+//        val evolutionRecyclerView = rootView.findViewById<RecyclerView>(R.id.recyclerViewEvolution)
+//        val evolutionList = ArrayList<PokeEvo>()
+//        val evolutionAdapter = EvolutionAdapter(evolutionList)
+//        evolutionRecyclerView.layoutManager = LinearLayoutManager(this)
+//        evolutionRecyclerView.adapter = evolutionAdapter
+//        evolutionList.add(PokeEvo(1, 12, "LVL UP"))
+//        val abilitiesTextView = rootView.findViewById<TextView>(R.id.abilities)
+//        abilitiesTextView.text = "New Value"
+//    }
 
-
-
-    private fun loadDataFromDB(index: Int, callback: (abilities: Map<String,Boolean>, base_exp : Int, effort : Map<String,Long>, moves : Map<String,Map<String, Any>>, stats : Map<String,Long>,
-    height : Int, weight : Int, evolutionMap : Any)-> Unit) {
+    private fun loadDataFromDB(
+        index: Int,
+        callback: (
+            abilities: Map<String, Boolean>, base_exp: Int, effort: Map<String, Long>, moves: Map<String, Map<String, Any>>, stats: Map<String, Long>,
+            height: Int, weight: Int, evolutionMap: Any,
+        ) -> Unit,
+    ) {
         val myRef = database.getReference("$index")
 
         myRef.addValueEventListener(object : ValueEventListener {
@@ -159,14 +165,15 @@ class InfoMainActivity : AppCompatActivity() {
 
             if(evolutionMap is HashMap<*,*>)
             {
-                Log.e("RUNTIME", "id = ${evolutionMap.keys}")
                 for(key in evolutionMap.keys)
                 {
                     val detailedMap = evolutionMap[key] as HashMap<*,*>;
-                    evolutionList.add(PokeEvo(
+                    evolutionList.add(
+                        PokeEvo(
                         drawableResourceId, detailedMap["minLevel"] as Long,
                         detailedMap["trigger"] as String
-                    ))
+                    )
+                    )
                 }
             }
 
@@ -175,19 +182,16 @@ class InfoMainActivity : AppCompatActivity() {
                 for(i in 1 until evolutionMap.size)
                 {
                     val detailedMap = evolutionMap[i] as HashMap<*,*>;
-                    evolutionList.add(PokeEvo(drawableResourceId, detailedMap["minLevel"] as Long,
+                    evolutionList.add(
+                        PokeEvo(drawableResourceId, detailedMap["minLevel"] as Long,
                         detailedMap["trigger"] as String
-                    ))
+                    )
+                    )
                 }
 
             }
-//            for(i in evolutionMap)
-//            {
-//                Log.e("RUNTIME",i.toString())
-//            }
-
-
-
+//            evolutionAdapter.notifyDataSetChanged()
+            Log.e("RUNTIME",evolutionList.toString())
             // Use other retrieved values (baseExp, effort, moves, stats) as needed
         }
     }
@@ -201,8 +205,9 @@ class InfoMainActivity : AppCompatActivity() {
         button.setImageDrawable(getDrawable(R.drawable.gender_switch))
         tabLayout = findViewById(R.id.tab_layout)
         viewPager = findViewById(R.id.view_pager)
-        pageAdapter = PageAdapter(supportFragmentManager,lifecycle)
+        pageAdapter = PageAdapter(supportFragmentManager,lifecycle,evolutionList)
         viewPager.adapter = pageAdapter
+
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
                 viewPager.currentItem = tab.position

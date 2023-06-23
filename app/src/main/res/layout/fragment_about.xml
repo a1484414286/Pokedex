@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/mainFrame"
+    android:id="@+id/fragment_container"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".swipes.About"
+    android:tag="about_fragment_tag"
     >
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/fragment_layout"
+        android:id="@+id/fragment_constraint_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <TextView
-            android:id="@id/abilities"
+            android:id="@+id/abilities"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:text="@string/abilities"
@@ -26,7 +27,7 @@
         <!--three abilities-->
 
         <TextView
-            android:id="@id/ability3"
+            android:id="@+id/ability3"
             android:layout_width="80dp"
             android:layout_height="50dp"
             android:background="@drawable/icon_oval"
@@ -39,7 +40,7 @@
 
 
         <TextView
-            android:id="@id/ability1"
+            android:id="@+id/ability1"
             android:layout_width="80dp"
             android:layout_height="50dp"
             android:background="@drawable/icon_oval"
@@ -51,7 +52,7 @@
             app:layout_constraintVertical_bias="0.029" />
 
         <TextView
-            android:id="@id/ability2"
+            android:id="@+id/ability2"
             android:layout_width="80dp"
             android:layout_height="50dp"
             android:background="@drawable/icon_oval"
@@ -154,11 +155,12 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewEvolution"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/icon_oval"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             app:layout_constraintTop_toBottomOf="@id/evolutionTag"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             android:orientation="horizontal" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

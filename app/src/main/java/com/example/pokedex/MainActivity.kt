@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.codepath.asynchttpclient.AsyncHttpClient
 import com.codepath.asynchttpclient.RequestParams
@@ -326,8 +327,6 @@ class MainActivity : AppCompatActivity() {
                             val effortVal = genStats.get("effort") as Int
                             effort[baseStatsName] = effortVal
                         }
-                        Log.e("RUNTIME",map.toString())
-//                        myRef.setValue(map);
                         if(movesFlag)
                         {
 
@@ -389,7 +388,6 @@ class MainActivity : AppCompatActivity() {
                                             json: JsonHttpResponseHandler.JSON
                                         ) {
                                             jsonList = json.jsonObject
-                                            Log.e("RUNTIME", jsonList.toString())
                                             var accuracy =
                                                 jsonList.get("accuracy")
                                             val dmg_class =
@@ -463,7 +461,6 @@ class MainActivity : AppCompatActivity() {
     fun checkCompletion(totalMoves: Int, completedMoves: Int, movesMap: HashMap<String, Any>) {
         if (completedMoves == totalMoves) {
             // All requests are completed, you can now access the movesMap safely
-            Log.e("BBB", movesMap.toString())
         }
     }
 
