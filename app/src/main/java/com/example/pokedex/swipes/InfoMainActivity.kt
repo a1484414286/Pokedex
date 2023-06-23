@@ -45,13 +45,23 @@ class InfoMainActivity : AppCompatActivity() {
         setContentView(R.layout.status_page)
         tabsContentSwitch()
         receiveDataFromPreviousActivity()
+        evolutionSetUp()
     }
 
 
-    private fun evolutionSetUp()
-    {
+    @SuppressLint("InflateParams")
+    private fun evolutionSetUp() {
+        val fragmentAboutView = layoutInflater.inflate(R.layout.fragment_about, null)
+        val evolutionRecyclerView = fragmentAboutView.findViewById<RecyclerView>(R.id.recyclerViewEvolution)
 
+        evolutionList = ArrayList()
+        evolutionAdapter = EvolutionAdapter(evolutionList)
+        evolutionRecyclerView.adapter = evolutionAdapter
+
+        // Use the evolutionRecyclerView as needed
     }
+
+
 
 
     private fun loadDataFromDB(index: Int, callback: (abilities: Map<String,Boolean>, base_exp : Int, effort : Map<String,Long>, moves : Map<String,Map<String, Any>>, stats : Map<String,Long>,
@@ -99,13 +109,18 @@ class InfoMainActivity : AppCompatActivity() {
         val imageView = findViewById<ImageView>(R.id.pokedexAvatar)
         findViewById<TextView>(R.id.pokedexID).text = "§  ${this.id}"
         findViewById<TextView>(R.id.pokedexPokemonName).text = name
-        val drawableName = "p${id.toInt()}"
-        val drawableResourceId = resources.getIdentifier(drawableName, "drawable", packageName)
-        Log.e("RUNTIME",id.toString())
+        var drawableName = "p${id.toInt()}"
+        var drawableResourceId = resources.getIdentifier(drawableName, "drawable", packageName)
+        if (drawableResourceId == 0) {
+            drawableName = "p${id}_f"
+            drawableResourceId =
+                resources.getIdentifier(drawableName, "drawable", packageName)
+        }
 
         Glide.with(this)
             .load(drawableResourceId)
             .into(imageView)
+
         loadDataFromDB(id.toInt()) { abilities, _, effort, moves, stats, height, weight, evolutionMap->
             // update ui based on data called back from fetch
             abilities.let { abilitiesList ->
@@ -145,13 +160,24 @@ class InfoMainActivity : AppCompatActivity() {
             if(evolutionMap is HashMap<*,*>)
             {
                 Log.e("RUNTIME", "id = ${evolutionMap.keys}")
+                for(key in evolutionMap.keys)
+                {
+                    val detailedMap = evolutionMap[key] as HashMap<*,*>;
+                    evolutionList.add(PokeEvo(
+                        drawableResourceId, detailedMap["minLevel"] as Long,
+                        detailedMap["trigger"] as String
+                    ))
+                }
             }
 
             else if(evolutionMap is ArrayList<*>)
             {
-                for(i in 0 until evolutionMap.size)
+                for(i in 1 until evolutionMap.size)
                 {
-                    Log.e("RUNTIME", "id = $i, info : ${evolutionMap.get(i)}")
+                    val detailedMap = evolutionMap[i] as HashMap<*,*>;
+                    evolutionList.add(PokeEvo(drawableResourceId, detailedMap["minLevel"] as Long,
+                        detailedMap["trigger"] as String
+                    ))
                 }
 
             }

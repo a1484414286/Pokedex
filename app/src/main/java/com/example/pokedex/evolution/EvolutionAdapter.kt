@@ -1,6 +1,7 @@
 package com.example.pokedex.evolution
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,8 +22,16 @@ class EvolutionAdapter(private val pokemonList: List<PokeEvo>) :
         @SuppressLint("SetTextI18n")
         fun bind(pokemon: PokeEvo) {
             // Bind the data to the views
+
+            var drawableResourceId = itemView.resources.getIdentifier(pokemon.imageId.toString(), "drawable", itemView.context.packageName)
+            if (drawableResourceId == 0) {
+                var drawableName = "p${pokemon.imageId}_f"
+                drawableResourceId =
+                    itemView.resources.getIdentifier(drawableName, "drawable", itemView.context.packageName)
+            }
+
             Glide.with(itemView)
-                .load(pokemon.imageId)
+                .load(drawableResourceId)
                 .into(this.imageView)
         }
     }
@@ -35,8 +44,15 @@ class EvolutionAdapter(private val pokemonList: List<PokeEvo>) :
         fun bind(pokemon: PokeEvo)
         {
             levelTextView.text = "Lvl ${pokemon.level}"
+            var drawableResourceId = itemView.resources.getIdentifier(pokemon.imageId.toString(), "drawable", itemView.context.packageName)
+            if (drawableResourceId == 0) {
+                var drawableName = "p${pokemon.imageId}_f"
+                drawableResourceId =
+                    itemView.resources.getIdentifier(drawableName, "drawable", itemView.context.packageName)
+            }
+
             Glide.with(itemView)
-                .load(pokemon.imageId)
+                .load(drawableResourceId)
                 .into(this.imageView)
         }
     }
@@ -51,11 +67,11 @@ class EvolutionAdapter(private val pokemonList: List<PokeEvo>) :
 
         return when (viewType) {
             VIEW_TYPE_BEGIN -> {
-                val view = inflater.inflate(R.layout.evolution_pokemon_end, parent, false)
+                val view = inflater.inflate(R.layout.evolution_pokemon_begin, parent, false)
                 ViewHolderBegin(view)
             }
             VIEW_TYPE_END -> {
-                val view = inflater.inflate(R.layout.evolution_pokemon_begin, parent, false)
+                val view = inflater.inflate(R.layout.evolution_pokemon_end, parent, false)
                 ViewHolderEnd(view)
             }
             else -> throw IllegalArgumentException("Invalid view type")
