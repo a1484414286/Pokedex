@@ -1,11 +1,12 @@
 package com.example.pokedex.evolution
 
-import android.annotation.SuppressLint
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.pokedex.R
@@ -17,21 +18,11 @@ class EvolutionAdapter(private var pokemonList: MutableList<PokeEvo>) :
     class ViewHolderBegin(itemView: View) : RecyclerView.ViewHolder(itemView) {
         // Get references to the views in the item layout
         private val imageView: ImageView = itemView.findViewById(R.id.evolutionImage)
-        @SuppressLint("SetTextI18n")
         fun bind(pokemon: PokeEvo) {
-            Log.e("RUNTIME","BEGIN CALLED")
             // Bind the data to the views
-
-            var drawableResourceId = itemView.resources.getIdentifier(pokemon.imageId.toString(), "drawable", itemView.context.packageName)
-            if (drawableResourceId == 0) {
-                var drawableName = "p${pokemon.imageId}_f"
-                drawableResourceId =
-                    itemView.resources.getIdentifier(drawableName, "drawable", itemView.context.packageName)
-            }
-
             Glide.with(itemView)
-                .load(drawableResourceId)
-                .into(this.imageView)
+                .load(pokemon.imageId)
+                .into(imageView)
         }
     }
 
@@ -39,21 +30,13 @@ class EvolutionAdapter(private var pokemonList: MutableList<PokeEvo>) :
     {
 //        private val levelTextView: TextView = itemView.findViewById(R.id.evolveReq)
         private val imageView: ImageView = itemView.findViewById(R.id.evolutionImage)
-
+        private val lvlReq : TextView = itemView.findViewById(R.id.evolveReq)
         fun bind(pokemon: PokeEvo)
         {
-            Log.e("RUNTIME_EVO","END CALLED")
-
-//            levelTextView.text = "Lvl ${pokemon.level}"
-            var drawableResourceId = itemView.resources.getIdentifier(pokemon.imageId.toString(), "drawable", itemView.context.packageName)
-            if (drawableResourceId == 0) {
-                var drawableName = "p${pokemon.imageId}_f"
-                drawableResourceId =
-                    itemView.resources.getIdentifier(drawableName, "drawable", itemView.context.packageName)
-            }
-
+            lvlReq.text = pokemon.level.toString()
+            lvlReq.gravity = Gravity.CENTER
             Glide.with(itemView)
-                .load(drawableResourceId)
+                .load(pokemon.imageId)
                 .into(imageView)
         }
     }
@@ -64,7 +47,6 @@ class EvolutionAdapter(private var pokemonList: MutableList<PokeEvo>) :
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        Log.e("RUNTIME","ONCREATE CALLED")
         val inflater = LayoutInflater.from(parent.context)
 
         return when (viewType) {
@@ -81,21 +63,25 @@ class EvolutionAdapter(private var pokemonList: MutableList<PokeEvo>) :
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val pokemon = pokemonList?.get(position)
+        val pokemon = pokemonList[position]
         when (holder) {
-            is ViewHolderBegin -> pokemon?.let { holder.bind(it) }
-            is ViewHolderEnd -> pokemon?.let { holder.bind(it) }
+            is ViewHolderBegin -> pokemon.let(holder::bind)
+            is ViewHolderEnd -> pokemon.let(holder::bind)
             else -> throw IllegalArgumentException("Invalid view holder type")
         }
     }
 
     override fun getItemViewType(position: Int): Int {
         // Determine the view type based on the position
-        return if(position == 0) VIEW_TYPE_BEGIN else VIEW_TYPE_END
+        return if(pokemonList.size == 1) {
+            VIEW_TYPE_BEGIN
+        } else {
+            if(position == 0 ) VIEW_TYPE_BEGIN else VIEW_TYPE_END
+        }
     }
 
     override fun getItemCount(): Int {
-        return pokemonList!!.size
+        return pokemonList.size
     }
 
 }

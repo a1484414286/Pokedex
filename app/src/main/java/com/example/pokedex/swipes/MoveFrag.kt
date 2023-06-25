@@ -9,10 +9,10 @@ import com.example.pokedex.R
 
 /**
  * A simple [Fragment] subclass.
- * Use the [Move.newInstance] factory method to
+ * Use the [MoveFrag.newInstance] factory method to
  * create an instance of this fragment.
  */
-class Move : Fragment() {
+class MoveFrag : Fragment() {
 
 
     override fun onCreateView(

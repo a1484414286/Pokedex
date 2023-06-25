@@ -22,14 +22,15 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.pokedex.R
 import com.example.pokedex.InfoMainActivity
+import com.example.pokedex.R
 
 
-class PokedexAdapter (private val context: Context, private val pokemonList : List<Pokemon>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    private val hashTable : HashMap<String, Int> = HashMap<String, Int>().apply {
+class PokedexAdapter(private val context: Context, private val pokemonList: List<Pokemon>) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private val hashTable: HashMap<String, Int> = HashMap<String, Int>().apply {
         R.drawable.normal.let { put("normal", it) }
-        R.drawable.fire.let{put("fire",it)}
+        R.drawable.fire.let { put("fire", it) }
         R.drawable.flying.let { put("flying", it) }
         R.drawable.psychic.let { put("psychic", it) }
         R.drawable.water.let { put("water", it) }
@@ -47,30 +48,32 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
         R.drawable.ground.let { put("ground", it) }
         R.drawable.fairy.let { put("fairy", it) }
     }
-    companion object{
+
+    companion object {
         private const val ITEM_TYPE_ONE = 1
         private const val ITEM_TYPE_TWO = 2
 
     }
 
     class ViewHolderOne(view: View) : RecyclerView.ViewHolder(view) {
-        val id : TextView
-        val name : TextView
+        val id: TextView
+        val name: TextView
         val animated_sprites: ImageView
-        val type1 : ImageButton
+        val type1: ImageButton
+
         init {
             // Find our RecyclerView item's ImageView for future use
             id = view.findViewById(R.id.Id)
             name = view.findViewById(R.id.pokemonName)
             animated_sprites = view.findViewById(R.id.pokemonImage)
             type1 = view.findViewById(R.id.type1)
-            view.setOnClickListener{
+            view.setOnClickListener {
                 var intent = Intent(view.context, InfoMainActivity::class.java)
-                intent.putExtra("id",id.text)
-                intent.putExtra("name",name.text)
-                intent.putExtra("type1",type1.drawable.toString())
+                intent.putExtra("id", id.text)
+                intent.putExtra("name", name.text)
+                intent.putExtra("type1", type1.drawable.toString())
                 view.context.startActivity(intent)
-                Toast.makeText(view.context,"${id.text} is clicked",Toast.LENGTH_SHORT).show()
+                Toast.makeText(view.context, "${id.text} is clicked", Toast.LENGTH_SHORT).show()
             }
 
         }
@@ -79,11 +82,11 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
 
 
     class ViewHolderTwo(view: View) : RecyclerView.ViewHolder(view) {
-        val id : TextView
-        val name : TextView
+        val id: TextView
+        val name: TextView
         val animated_sprites: ImageView
-        val type1 : ImageButton
-        val type2 : ImageButton
+        val type1: ImageButton
+        val type2: ImageButton
 
         init {
             id = view.findViewById(R.id.Id)
@@ -94,19 +97,19 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
             type2 = view.findViewById(R.id.type2)
 
 
-            view.setOnClickListener{
+            view.setOnClickListener {
 
                 var intent = Intent(view.context, InfoMainActivity::class.java)
-                intent.putExtra("id",id.text)
-                intent.putExtra("name",name.text)
+                intent.putExtra("id", id.text)
+                intent.putExtra("name", name.text)
                 intent.putExtra("type1", type1.drawable.toString())
                 intent.putExtra("type2", type2.drawable.toString())
                 view.context.startActivity(intent)
-                Toast.makeText(view.context,"${id.text} is clicked",Toast.LENGTH_SHORT).show()
-                }
+                Toast.makeText(view.context, "${id.text} is clicked", Toast.LENGTH_SHORT).show()
+            }
         }
 
-        private fun getResourceId(itemView : View, drawable: Drawable): Int {
+        private fun getResourceId(itemView: View, drawable: Drawable): Int {
             val resources = itemView.context.resources
             val packageName = itemView.context.packageName
 
@@ -124,14 +127,11 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
         val screenHeight = displayMetrics.heightPixels
         val itemWidth = (screenWidth / 3) - (2 * 10) // Adjust the left and right margin as needed
         val itemHeight = (screenHeight * 0.3).toInt() // Adjust the percentage as needed
-        if(viewType == ITEM_TYPE_ONE)
-        {
+        if (viewType == ITEM_TYPE_ONE) {
             val relativeLayout = view.findViewById<RelativeLayout>(R.id.singleItemLayout)
             val layoutParams = RelativeLayout.LayoutParams(itemWidth, itemHeight)
             relativeLayout.layoutParams = layoutParams
-        }
-        else
-        {
+        } else {
             val relativeLayout = view.findViewById<RelativeLayout>(R.id.doubleItemLayout)
             val layoutParams = RelativeLayout.LayoutParams(itemWidth, itemHeight)
             relativeLayout.layoutParams = layoutParams
@@ -141,7 +141,7 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        Log.e("RUNTIME","CREATED")
+        Log.e("RUNTIME", "CREATED")
         val view = when (viewType) {
             ITEM_TYPE_ONE -> inflater.inflate(R.layout.single_type_pokemon, parent, false)
             ITEM_TYPE_TWO -> inflater.inflate(R.layout.duo_type_pokemon, parent, false)
@@ -158,8 +158,7 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
     @SuppressLint("UseCompatLoadingForDrawables")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 
-        when(holder.itemViewType)
-        {
+        when (holder.itemViewType) {
 
             ITEM_TYPE_ONE -> {
                 val viewHolderOne = holder as ViewHolderOne
@@ -168,7 +167,7 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
                 viewHolderOne.type1.setImageDrawable(
                     hashTable[pokemonList[position].type1]
 
-                    ?.let { resizeImageToFit(context, it,120,50) })
+                        ?.let { resizeImageToFit(context, it, 120, 50) })
                 Glide.with(viewHolderOne.itemView)
                     .load(pokemonList[position].imageSource)
                     .into(viewHolderOne.animated_sprites)
@@ -178,8 +177,22 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
                 val viewHolderTwo = holder as ViewHolderTwo
                 viewHolderTwo.id.text = "§ " + pokemonList[position].id.toString()
                 viewHolderTwo.name.text = pokemonList[position].name
-                viewHolderTwo.type1.setImageDrawable(hashTable[pokemonList[position].type1]?.let { resizeImageToFit(context, it, 120, 50) })
-                viewHolderTwo.type2.setImageDrawable(hashTable[pokemonList[position].type2]?.let { resizeImageToFit(context, it, 120, 50) })
+                viewHolderTwo.type1.setImageDrawable(hashTable[pokemonList[position].type1]?.let {
+                    resizeImageToFit(
+                        context,
+                        it,
+                        120,
+                        50
+                    )
+                })
+                viewHolderTwo.type2.setImageDrawable(hashTable[pokemonList[position].type2]?.let {
+                    resizeImageToFit(
+                        context,
+                        it,
+                        120,
+                        50
+                    )
+                })
                 Log.e("RUNTIME", pokemonList[position].imageSource.toString())
                 Glide.with(viewHolderTwo.itemView)
                     .load(pokemonList[position].imageSource)
@@ -200,7 +213,12 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
         }
     }
 
-    private fun resizeImageToFit(context: Context, imageResId: Int, targetWidth: Int, targetHeight: Int): Drawable? {
+    private fun resizeImageToFit(
+        context: Context,
+        imageResId: Int,
+        targetWidth: Int,
+        targetHeight: Int,
+    ): Drawable? {
         return try {
             val options = BitmapFactory.Options().apply {
                 inJustDecodeBounds = true
@@ -217,7 +235,11 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
         }
     }
 
-    private fun calculateInSampleSize(options: BitmapFactory.Options, targetWidth: Int, targetHeight: Int): Int {
+    private fun calculateInSampleSize(
+        options: BitmapFactory.Options,
+        targetWidth: Int,
+        targetHeight: Int,
+    ): Int {
         val width = options.outWidth
         val height = options.outHeight
         var inSampleSize = 1
@@ -234,6 +256,6 @@ class PokedexAdapter (private val context: Context, private val pokemonList : Li
     }
 
     override fun getItemCount(): Int {
-       return pokemonList.size
+        return pokemonList.size
     }
 }

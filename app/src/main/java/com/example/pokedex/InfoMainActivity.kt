@@ -2,7 +2,6 @@ package com.example.pokedex
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -10,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.example.pokedex.evolution.PokeEvo
-import com.example.pokedex.swipes.About
+import com.example.pokedex.main.Ability
 import com.example.pokedex.swipes.PageAdapter
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.FirebaseApp
@@ -27,12 +26,12 @@ class InfoMainActivity : AppCompatActivity() {
     private lateinit var tabLayout: TabLayout
     private lateinit var pageAdapter : PageAdapter
     private lateinit var evolutionList : ArrayList<PokeEvo>
+    private lateinit var abilitiesList : ArrayList<Ability>
 
     private lateinit var id : String
     private lateinit var name : String
     private lateinit var type1 : String
     private lateinit var type2 : String
-    private lateinit var aboutFragment : About
     private val database = Firebase.database
 
 
@@ -41,30 +40,10 @@ class InfoMainActivity : AppCompatActivity() {
         FirebaseApp.initializeApp(this)
         setContentView(R.layout.status_page)
         evolutionList = ArrayList()
+        abilitiesList = ArrayList()
         receiveDataFromPreviousActivity()
         tabsContentSwitch()
     }
-
-//    private fun evolutionSetup()
-//    {
-//        val fragment: Fragment? = supportFragmentManager.findFragmentById(R.id.fragment_container)
-//
-//        val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
-//
-//        fragment?.let { transaction.replace(R.id.fragment_container, it) }
-//
-//        transaction.commit()
-//        val rootView = findViewById<FrameLayout>(R.id.fragment_container)
-//        val evolutionRecyclerView = rootView.findViewById<RecyclerView>(R.id.recyclerViewEvolution)
-//        val evolutionList = ArrayList<PokeEvo>()
-//        val evolutionAdapter = EvolutionAdapter(evolutionList)
-//        evolutionRecyclerView.layoutManager = LinearLayoutManager(this)
-//        evolutionRecyclerView.adapter = evolutionAdapter
-//        evolutionList.add(PokeEvo(1, 12, "LVL UP"))
-//        val abilitiesTextView = rootView.findViewById<TextView>(R.id.abilities)
-//        abilitiesTextView.text = "New Value"
-//    }
-
     private fun loadDataFromDB(
         index: Int,
         callback: (
@@ -85,12 +64,12 @@ class InfoMainActivity : AppCompatActivity() {
                 val stats = value["stats"] as Map<String, Long>
                 val height = (value["height"] as Long).toInt()
                 val weight = (value["weight"] as Long).toInt()
-                val evolutionMap : Any;
+                val evolutionMap : Any
                 evolutionMap = if(index < 4) {
-                    value["evolution"] as ArrayList<Any>;
+                    value["evolution"] as ArrayList<Any>
 
                 } else {
-                    value["evolution"] as HashMap<Int,Any>;
+                    value["evolution"] as HashMap<Int,Any>
                 }
 
                 callback(
@@ -104,6 +83,17 @@ class InfoMainActivity : AppCompatActivity() {
             }
         })
     }
+
+    @SuppressLint("DiscouragedApi")
+    private fun fetchResourceID(drawableName : String): Int {
+        var drawableResourceId = resources.getIdentifier("p$drawableName", "drawable", packageName)
+        if (drawableResourceId == 0) {
+            val name = "p${drawableName}_f"
+            drawableResourceId =
+                resources.getIdentifier(name, "drawable", packageName)
+        }
+        return drawableResourceId
+    }
     @SuppressLint("SetTextI18n")
     private fun receiveDataFromPreviousActivity()
     {
@@ -115,24 +105,18 @@ class InfoMainActivity : AppCompatActivity() {
         val imageView = findViewById<ImageView>(R.id.pokedexAvatar)
         findViewById<TextView>(R.id.pokedexID).text = "§  ${this.id}"
         findViewById<TextView>(R.id.pokedexPokemonName).text = name
-        var drawableName = "p${id.toInt()}"
-        var drawableResourceId = resources.getIdentifier(drawableName, "drawable", packageName)
-        if (drawableResourceId == 0) {
-            drawableName = "p${id}_f"
-            drawableResourceId =
-                resources.getIdentifier(drawableName, "drawable", packageName)
-        }
-
+        val drawableResourceId= fetchResourceID(id)
         Glide.with(this)
             .load(drawableResourceId)
             .into(imageView)
 
         loadDataFromDB(id.toInt()) { abilities, _, effort, moves, stats, height, weight, evolutionMap->
             // update ui based on data called back from fetch
-            abilities.let { abilitiesList ->
-                for(ability in abilitiesList) {
-                    val name = ability
-                    //load into ui
+            abilities.let { list ->
+                for(ability in list.keys) {
+                    val name =  ability as String
+                    val bool = list[ability] as Boolean
+                    abilitiesList.add(Ability(name,bool))
                 }
             }
 
@@ -167,11 +151,11 @@ class InfoMainActivity : AppCompatActivity() {
             {
                 for(key in evolutionMap.keys)
                 {
-                    val detailedMap = evolutionMap[key] as HashMap<*,*>;
+                    val detailedMap = evolutionMap[key] as HashMap<*,*>
                     evolutionList.add(
                         PokeEvo(
-                        drawableResourceId, detailedMap["minLevel"] as Long,
-                        detailedMap["trigger"] as String
+                            key.toString().toInt(), detailedMap["minLevel"] as Long,
+                        detailedMap["trigger"] as String, detailedMap["priority"] as Long
                     )
                     )
                 }
@@ -181,23 +165,22 @@ class InfoMainActivity : AppCompatActivity() {
             {
                 for(i in 1 until evolutionMap.size)
                 {
-                    val detailedMap = evolutionMap[i] as HashMap<*,*>;
+                    val detailedMap = evolutionMap[i] as HashMap<*,*>
                     evolutionList.add(
-                        PokeEvo(drawableResourceId, detailedMap["minLevel"] as Long,
-                        detailedMap["trigger"] as String
+                        PokeEvo(i, detailedMap["minLevel"] as Long,
+                        detailedMap["trigger"] as String, detailedMap["priority"] as Long
                     )
                     )
                 }
 
             }
-//            evolutionAdapter.notifyDataSetChanged()
-            Log.e("RUNTIME",evolutionList.toString())
             // Use other retrieved values (baseExp, effort, moves, stats) as needed
         }
     }
 
 
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     private fun tabsContentSwitch()
     {
 
@@ -205,7 +188,7 @@ class InfoMainActivity : AppCompatActivity() {
         button.setImageDrawable(getDrawable(R.drawable.gender_switch))
         tabLayout = findViewById(R.id.tab_layout)
         viewPager = findViewById(R.id.view_pager)
-        pageAdapter = PageAdapter(supportFragmentManager,lifecycle,evolutionList)
+        pageAdapter = PageAdapter(supportFragmentManager,lifecycle,evolutionList,abilitiesList)
         viewPager.adapter = pageAdapter
 
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {

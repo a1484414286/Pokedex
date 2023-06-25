@@ -9,10 +9,10 @@ import com.example.pokedex.R
 
 /**
  * A simple [Fragment] subclass.
- * Use the [Abilities.newInstance] factory method to
+ * Use the [AbilitiesFrag.newInstance] factory method to
  * create an instance of this fragment.
  */
-class Abilities : Fragment() {
+class AbilitiesFrag : Fragment() {
 
 
     override fun onCreateView(

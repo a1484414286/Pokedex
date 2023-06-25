@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.codepath.asynchttpclient.AsyncHttpClient
 import com.codepath.asynchttpclient.RequestParams
@@ -40,8 +39,8 @@ class MainActivity : AppCompatActivity() {
         FirebaseApp.initializeApp(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        pokemonRecyclerViewSetup()
-//        fetchData();
+//        pokemonRecyclerViewSetup()
+        fetchData();
 //        deleteData()
 
     }
@@ -138,17 +137,17 @@ class MainActivity : AppCompatActivity() {
 
     private fun hashMapSetUp(): HashMap<String, Any> {
         var map = HashMap<String, Any>();
-        map["id"] = 0;
-        map["base_exp"] = 0
-        map["weight"] = 0
-        map["height"] = 0
-        map["abilities"] = HashMap<String, Boolean>();
-        map["types"] = ArrayList<String>();
-        map["stats"] = HashMap<String, Int>();
-        map["moves"] = HashMap<Any, Any>();
-        map["effort"] = HashMap<String, Int>();
-        map["moves"] = HashMap<String, HashMap<String, Any>>();
-//        map["evolution"] = HashMap<Any,Any>();
+//        map["id"] = 0;
+//        map["base_exp"] = 0
+//        map["weight"] = 0
+//        map["height"] = 0
+//        map["abilities"] = HashMap<String, Boolean>();
+//        map["types"] = ArrayList<String>();
+//        map["stats"] = HashMap<String, Int>();
+//        map["moves"] = HashMap<Any, Any>();
+//        map["effort"] = HashMap<String, Int>();
+//        map["moves"] = HashMap<String, HashMap<String, Any>>();
+        map["evolution"] = HashMap<Any,Any>();
         return map;
 
     }
@@ -168,32 +167,36 @@ class MainActivity : AppCompatActivity() {
                     "name" to evolutionData.name,
                     "isBaby" to evolutionData.isBaby,
                     "minLevel" to evolutionData.minLevel,
-                    "trigger" to evolutionData.trigger
+                    "trigger" to evolutionData.trigger,
+                    "priority" to evolutionData.priority,
+                    "item" to evolutionData.item,
+                    "gender" to evolutionData.gender,
+                    "minHappiness" to evolutionData.minHappiness,
+                    "timeOfDay" to evolutionData.timeOfDay,
                     // Add more fields as needed
                 )
             }
             map["evolution"] = pokemonData
 
             // Set the data for the Pokemon
-            pokemonChildRef.setValue(map)
+            pokemonChildRef.updateChildren(map)
         }
     }
     private fun fetchData(){
         val client = AsyncHttpClient()
         val params = RequestParams()
-        val flag = true;
-        val movesFlag = true;
+        val flag = false;
+        val movesFlag = false;
         params["limit"] = "5"
         params["page"] = "0"
 //        val randomValue = (0..1009).random()
-        var index = 200
-        while(index != 400) {
+        var index = 232
+        while(index != 233) {
             val map = hashMapSetUp();
 
             client.run {
 
                 if(!flag){
-
                 get(/* url = */"https://pokeapi.co/api/v2/evolution-chain/$index",
                     object : JsonHttpResponseHandler()
                     {
@@ -207,7 +210,9 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         override fun onSuccess(statusCode: Int, headers: Headers?, json: JsonHttpResponseHandler.JSON) {
-
+                            Log.e("RUNTIME_EVOLUTION","TRUE")
+                            Log.e("RUNTIME_EVOLUTION", "TRUE")
+                            var priority = 0
                             val jsonList = json.jsonObject
                             val chain = jsonList.getJSONObject("chain")
                             var tempArr: JSONObject? = chain
@@ -222,51 +227,138 @@ class MainActivity : AppCompatActivity() {
                                 matcher.reset(speciesUrl)
                                 val speciesId = if (matcher.find()) matcher.group(1) else ""
                                 val speciesName = species.getString("name")
-
                                 val isBaby = tempArr.getBoolean("is_baby")
-
                                 val evolutionDetails = tempArr.getJSONArray("evolution_details")
+
                                 if (evolutionDetails.length() > 0) {
                                     val firstEvolution = evolutionDetails.getJSONObject(0)
-                                    // Extract the required details from the firstEvolution object
-                                    val minLevel = if (firstEvolution.isNull("min_level")) {
-                                        0 // Default value when "min_level" is null
-                                    } else {
-                                        firstEvolution.getInt("min_level")
-                                    }
+                                    val itemName = firstEvolution.optJSONObject("item")?.optString("name", "").toString()
+                                    val minLevel = firstEvolution.optInt("min_level", 0)
                                     val trigger = firstEvolution.getJSONObject("trigger").getString("name")
-                                    // Add more fields as needed
+                                    val gender = if(firstEvolution.isNull("gender"))
+                                    {
+                                        ""
+                                    }else{
+                                        if(firstEvolution.get("gender") == 0)
+                                        {
+                                            "Male"
+                                        }
+                                        else
+                                        {
+                                            "Female"
+                                        }
+                                    }
+                                    Log.e("RUNTIME",speciesName)
+
+                                    val time = firstEvolution.optString("time_of_day").toString()
+                                    val minHappiness = firstEvolution.optString("minHappiness").toString()
 
                                     val evolutionData = EvolutionData(
                                         id = speciesId,
                                         name = speciesName,
                                         isBaby = isBaby,
                                         minLevel = minLevel,
-                                        trigger = trigger
-                                        // Initialize more fields as needed
+                                        trigger = trigger,
+                                        item = itemName,
+                                        priority = priority++,
+                                        gender = gender,
+                                        minHappiness = minHappiness,
+                                        timeOfDay = time
                                     )
+
                                     evolutionDataList.add(evolutionData)
                                 } else {
-                                    val evolutionData = EvolutionData(
+                                   val evolutionData = EvolutionData(
                                         id = speciesId,
                                         name = speciesName,
                                         isBaby = isBaby,
                                         minLevel = 0,
-                                        trigger = ""
-                                        // Initialize more fields as needed
+                                        trigger = "",
+                                        item = "",
+                                        priority = priority++,
+                                        gender = "",
+                                        minHappiness = "",
+                                        timeOfDay = "",
                                     )
                                     evolutionDataList.add(evolutionData)
                                 }
+
                                 val evolvesTo = tempArr.getJSONArray("evolves_to")
+
                                 if (evolvesTo.length() > 0) {
+                                    for (i in 0 until evolvesTo.length()) {
+                                        val evolvesToObj = evolvesTo.getJSONObject(i)
+                                        // Extract data from evolvesToObj and create EvolutionData instance
+                                        // Add the EvolutionData instance to evolutionDataList
+                                        val evolvesToSpecies = evolvesToObj.getJSONObject("species")
+                                        val evolvesToSpeciesUrl = evolvesToSpecies.getString("url")
+                                        matcher.reset(evolvesToSpeciesUrl)
+                                        val evolvesToSpeciesId = if (matcher.find()) matcher.group(1) else ""
+                                        val evolvesToSpeciesName = evolvesToSpecies.getString("name")
+                                        val evolvesToIsBaby = evolvesToObj.getBoolean("is_baby")
+                                        val evolvesToEvolutionDetails = evolvesToObj.getJSONArray("evolution_details")
+
+
+                                        if (evolvesToEvolutionDetails.length() > 0) {
+                                            val evolvesToFirstEvolution = evolvesToEvolutionDetails.getJSONObject(0)
+                                            val evovles_ItemName = evolvesToFirstEvolution.optJSONObject("item")?.optString("name", "").toString()
+                                            val evovles_MinLevel = evolvesToFirstEvolution.optInt("min_level", 0)
+                                            val evovles_trigger = evolvesToFirstEvolution.getJSONObject("trigger").getString("name")
+                                            val evovels_gender = if(evolvesToFirstEvolution.isNull("gender"))
+                                            {
+                                                ""
+                                            }else{
+                                                if(evolvesToFirstEvolution.get("gender") == 0)
+                                                {
+                                                    "Male"
+                                                }
+                                                else
+                                                {
+                                                    "Female"
+                                                }
+                                            }
+
+                                            val evovles_time = evolvesToFirstEvolution.optString("time_of_day").toString()
+                                            val evovles_minHappiness = evolvesToFirstEvolution.optString("minHappiness").toString()
+
+
+                                            val evolvesToEvolutionData = EvolutionData(
+                                                id = evolvesToSpeciesId,
+                                                name = evolvesToSpeciesName,
+                                                isBaby = evolvesToIsBaby,
+                                                minLevel = evovles_MinLevel,
+                                                trigger = evovles_trigger,
+                                                item = evovles_ItemName,
+                                                priority = priority++,
+                                                gender = evovels_gender,
+                                                minHappiness = evovles_minHappiness,
+                                                timeOfDay = evovles_time,
+                                            )
+                                            evolutionDataList.add(evolvesToEvolutionData)
+                                        } else {
+                                            val evolvesToEvolutionData = EvolutionData(
+                                                id = speciesId,
+                                                name = speciesName,
+                                                isBaby = isBaby,
+                                                minLevel = 0,
+                                                trigger = "",
+                                                item = "",
+                                                priority = priority++,
+                                                gender = "",
+                                                minHappiness = "",
+                                                timeOfDay = "",
+                                            )
+                                            evolutionDataList.add(evolvesToEvolutionData)
+                                        }
+                                    }
+
                                     tempArr = evolvesTo.getJSONObject(0)
                                 } else {
                                     tempArr = null
                                 }
                             }
 
-                            linkPokemonEvolutions(evolutionDataList,map)
-
+                            linkPokemonEvolutions(evolutionDataList, map)
                         }
 
                     }
