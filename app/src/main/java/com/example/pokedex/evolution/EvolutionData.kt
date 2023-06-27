@@ -1,7 +1,5 @@
 package com.example.pokedex.evolution
 
-import org.json.JSONObject
-
 data class EvolutionData(
     val id: String,
     val name: String,
@@ -11,7 +9,7 @@ data class EvolutionData(
     val priority: Int,
     val item: String,
     val gender: String,
-    val minHappiness: String,
+    val minHappiness: Int,
     val timeOfDay: String,
     // Add more fields as needed
 )

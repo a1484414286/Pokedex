@@ -1,6 +1,7 @@
 package com.example.pokedex
 
 import Pokemon
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -25,6 +26,7 @@ import okhttp3.Headers
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.regex.Pattern
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -39,8 +41,8 @@ class MainActivity : AppCompatActivity() {
         FirebaseApp.initializeApp(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-//        pokemonRecyclerViewSetup()
-        fetchData();
+        pokemonRecyclerViewSetup()
+//        fetchData();
 //        deleteData()
 
     }
@@ -74,10 +76,11 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    @SuppressLint("DiscouragedApi")
     private fun addData() {
         val maxIndex = 807
         val scope = CoroutineScope(Dispatchers.Main)
-        val sortedMap: SortedMap<Int, Pokemon> = Collections.synchronizedSortedMap(TreeMap())
+        val sortedMap = ConcurrentHashMap<Int, Pokemon>()
 
         for (index in 1..maxIndex) {
             scope.launch {
@@ -99,7 +102,6 @@ class MainActivity : AppCompatActivity() {
                         )
                         sortedMap[index] = p
                         if (sortedMap.size == maxIndex) {
-                            // All items have been fetched, add them to the pokemonList
                             pokemonList.addAll(sortedMap.values)
                             recyclerView.adapter?.notifyDataSetChanged()
                         }
@@ -116,7 +118,6 @@ class MainActivity : AppCompatActivity() {
                         )
                         sortedMap[index] = p
                         if (sortedMap.size == maxIndex) {
-                            // All items have been fetched, add them to the pokemonList
                             pokemonList.addAll(sortedMap.values)
                             recyclerView.adapter?.notifyDataSetChanged()
                         }
@@ -126,29 +127,82 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+//    @SuppressLint("DiscouragedApi")
+//    private fun addData() {
+//        val maxIndex = 807
+//        val scope = CoroutineScope(Dispatchers.Main)
+//        val sortedMap: SortedMap<Int, Pokemon> = Collections.synchronizedSortedMap(TreeMap())
+//
+//        for (index in 1..maxIndex) {
+//            scope.launch {
+//                var drawableName = "p${index}"
+//                val drawableResourceId = resources.getIdentifier(drawableName, "drawable", packageName)
+//
+//                if (drawableResourceId == 0) {
+//                    drawableName = "p${index}_f"
+//                    val drawableResourceId =
+//                        resources.getIdentifier(drawableName, "drawable", packageName)
+//                    val drawable = ContextCompat.getDrawable(this@MainActivity, drawableResourceId)
+//                    test(index) { name, types ->
+//                        val p = Pokemon(
+//                            drawableName.removePrefix("p").removeSuffix("_f").toInt(),
+//                            drawable,
+//                            name,
+//                            types?.get(0).toString(),
+//                            types?.getOrNull(1)?.toString() ?: ""
+//                        )
+//                        sortedMap[index] = p
+//                        if (sortedMap.size == maxIndex) {
+//                            // All items have been fetched, add them to the pokemonList
+//                            pokemonList.addAll(sortedMap.values)
+//                            recyclerView.adapter?.notifyDataSetChanged()
+//                        }
+//                    }
+//                } else {
+//                    val drawable = ContextCompat.getDrawable(this@MainActivity, drawableResourceId)
+//                    test(index) { name, types ->
+//                        val p = Pokemon(
+//                            index,
+//                            drawable,
+//                            name,
+//                            types?.get(0).toString(),
+//                            types?.getOrNull(1)?.toString() ?: ""
+//                        )
+//                        sortedMap[index] = p
+//                        if (sortedMap.size == maxIndex) {
+//                            // All items have been fetched, add them to the pokemonList
+//                            pokemonList.addAll(sortedMap.values)
+//                            recyclerView.adapter?.notifyDataSetChanged()
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+
 
     private fun deleteData() {
-        var index = 1000;
+        var index = 1000
         while (index != 0) {
             database.getReference(index.toString()).removeValue()
-            index--;
+            index--
         }
     }
 
     private fun hashMapSetUp(): HashMap<String, Any> {
-        var map = HashMap<String, Any>();
+        var map = HashMap<String, Any>()
 //        map["id"] = 0;
 //        map["base_exp"] = 0
 //        map["weight"] = 0
 //        map["height"] = 0
-//        map["abilities"] = HashMap<String, Boolean>();
-//        map["types"] = ArrayList<String>();
-//        map["stats"] = HashMap<String, Int>();
-//        map["moves"] = HashMap<Any, Any>();
-//        map["effort"] = HashMap<String, Int>();
-//        map["moves"] = HashMap<String, HashMap<String, Any>>();
-        map["evolution"] = HashMap<Any,Any>();
-        return map;
+//        map["abilities"] = HashMap<String, Boolean>()
+//        map["types"] = ArrayList<String>()
+//        map["stats"] = HashMap<String, Int>()
+//        map["moves"] = HashMap<Any, Any>()
+//        map["effort"] = HashMap<String, Int>()
+//        map["moves"] = HashMap<String, HashMap<String, Any>>()
+        map["evolution"] = HashMap<Any,Any>()
+        return map
 
     }
     fun linkPokemonEvolutions(evolutionDataList: List<EvolutionData>, map: HashMap<String, Any>) {
@@ -185,14 +239,14 @@ class MainActivity : AppCompatActivity() {
     private fun fetchData(){
         val client = AsyncHttpClient()
         val params = RequestParams()
-        val flag = false;
-        val movesFlag = false;
+        val flag = false
+        val movesFlag = false
         params["limit"] = "5"
         params["page"] = "0"
 //        val randomValue = (0..1009).random()
-        var index = 232
-        while(index != 233) {
-            val map = hashMapSetUp();
+        var index = 0
+        while(index != 539) {
+            val map = hashMapSetUp()
 
             client.run {
 
@@ -210,8 +264,6 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         override fun onSuccess(statusCode: Int, headers: Headers?, json: JsonHttpResponseHandler.JSON) {
-                            Log.e("RUNTIME_EVOLUTION","TRUE")
-                            Log.e("RUNTIME_EVOLUTION", "TRUE")
                             var priority = 0
                             val jsonList = json.jsonObject
                             val chain = jsonList.getJSONObject("chain")
@@ -251,8 +303,7 @@ class MainActivity : AppCompatActivity() {
                                     Log.e("RUNTIME",speciesName)
 
                                     val time = firstEvolution.optString("time_of_day").toString()
-                                    val minHappiness = firstEvolution.optString("minHappiness").toString()
-
+                                    val minHappiness = firstEvolution.optInt("min_happiness")
                                     val evolutionData = EvolutionData(
                                         id = speciesId,
                                         name = speciesName,
@@ -265,7 +316,7 @@ class MainActivity : AppCompatActivity() {
                                         minHappiness = minHappiness,
                                         timeOfDay = time
                                     )
-
+                                    priority++;
                                     evolutionDataList.add(evolutionData)
                                 } else {
                                    val evolutionData = EvolutionData(
@@ -277,7 +328,7 @@ class MainActivity : AppCompatActivity() {
                                         item = "",
                                         priority = priority++,
                                         gender = "",
-                                        minHappiness = "",
+                                        minHappiness = 0,
                                         timeOfDay = "",
                                     )
                                     evolutionDataList.add(evolutionData)
@@ -319,7 +370,7 @@ class MainActivity : AppCompatActivity() {
                                             }
 
                                             val evovles_time = evolvesToFirstEvolution.optString("time_of_day").toString()
-                                            val evovles_minHappiness = evolvesToFirstEvolution.optString("minHappiness").toString()
+                                            val evovles_minHappiness = evolvesToFirstEvolution.optInt("min_happiness")
 
 
                                             val evolvesToEvolutionData = EvolutionData(
@@ -337,15 +388,15 @@ class MainActivity : AppCompatActivity() {
                                             evolutionDataList.add(evolvesToEvolutionData)
                                         } else {
                                             val evolvesToEvolutionData = EvolutionData(
-                                                id = speciesId,
-                                                name = speciesName,
-                                                isBaby = isBaby,
+                                                id = evolvesToSpeciesId,
+                                                name = evolvesToSpeciesName,
+                                                isBaby = evolvesToIsBaby,
                                                 minLevel = 0,
                                                 trigger = "",
                                                 item = "",
                                                 priority = priority++,
                                                 gender = "",
-                                                minHappiness = "",
+                                                minHappiness = 0,
                                                 timeOfDay = "",
                                             )
                                             evolutionDataList.add(evolvesToEvolutionData)
@@ -376,7 +427,6 @@ class MainActivity : AppCompatActivity() {
                     ) {
                         var jsonList = json.jsonObject
                         val myRef = database.getReference(jsonList.get("id").toString())
-
                         val jsonArr: JSONArray = jsonList.get("abilities") as JSONArray
                         var abilitiesMap = map["abilities"] as HashMap<String, Boolean>;
                         for (i in 0 until jsonArr.length()) {

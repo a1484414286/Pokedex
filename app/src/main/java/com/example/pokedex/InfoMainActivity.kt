@@ -1,5 +1,6 @@
 package com.example.pokedex
 
+import com.example.pokedex.evolution.PokeEvo
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.ImageButton
@@ -8,7 +9,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
-import com.example.pokedex.evolution.PokeEvo
 import com.example.pokedex.main.Ability
 import com.example.pokedex.swipes.PageAdapter
 import com.google.android.material.tabs.TabLayout
@@ -18,6 +18,8 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import java.util.Comparator
+import java.util.PriorityQueue
 
 
 @Suppress("UNCHECKED_CAST")
@@ -25,7 +27,7 @@ class InfoMainActivity : AppCompatActivity() {
     private lateinit var viewPager : ViewPager2
     private lateinit var tabLayout: TabLayout
     private lateinit var pageAdapter : PageAdapter
-    private lateinit var evolutionList : ArrayList<PokeEvo>
+    private lateinit var evolutionList : PriorityQueue<PokeEvo>
     private lateinit var abilitiesList : ArrayList<Ability>
 
     private lateinit var id : String
@@ -39,11 +41,14 @@ class InfoMainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
         setContentView(R.layout.status_page)
-        evolutionList = ArrayList()
+        evolutionList = PriorityQueue(Comparator(PokeEvoComparator))
         abilitiesList = ArrayList()
         receiveDataFromPreviousActivity()
         tabsContentSwitch()
     }
+
+
+
     private fun loadDataFromDB(
         index: Int,
         callback: (

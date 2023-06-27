@@ -16,6 +16,7 @@ import com.example.pokedex.evolution.EvolutionAdapter
 import com.example.pokedex.evolution.PokeEvo
 import com.example.pokedex.main.Ability
 import org.w3c.dom.Text
+import java.util.PriorityQueue
 
 /**
  * A simple [Fragment] subclass.
@@ -25,7 +26,7 @@ import org.w3c.dom.Text
 class About(var evolutionTree: Any, var abilitiesTree:Any?) : Fragment() {
     private lateinit var evolutionRecyclerView: RecyclerView
     private lateinit var evolutionAdapter: EvolutionAdapter
-    private lateinit var evolutionList: MutableList<PokeEvo>
+    private lateinit var evolutionList: PriorityQueue<PokeEvo>
 
     private lateinit var abilitiesList : MutableList<Ability>
     @SuppressLint("CutPasteId")
@@ -39,9 +40,8 @@ class About(var evolutionTree: Any, var abilitiesTree:Any?) : Fragment() {
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
 
 
-        evolutionList = evolutionTree as ArrayList<PokeEvo>
+        evolutionList = evolutionTree as PriorityQueue<PokeEvo>
 
-        evolutionList = evolutionList.sortedWith(compareBy { it.priority }) as MutableList<PokeEvo>
 
         for(i in evolutionList)
         {

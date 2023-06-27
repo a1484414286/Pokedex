@@ -6,11 +6,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.pokedex.evolution.PokeEvo
 import com.example.pokedex.main.Ability
+import java.util.PriorityQueue
 
 class PageAdapter(
     fragmentManager: FragmentManager,
     lifecycle: Lifecycle,
-    private val aboutData: ArrayList<PokeEvo>,
+    private val aboutData: PriorityQueue<PokeEvo>,
     private val abilitiesList: ArrayList<Ability>
 ) :
     FragmentStateAdapter(fragmentManager, lifecycle) {
