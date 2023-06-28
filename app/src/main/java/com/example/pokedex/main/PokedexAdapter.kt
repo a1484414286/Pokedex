@@ -109,13 +109,6 @@ class PokedexAdapter(private val context: Context, private val pokemonList: List
             }
         }
 
-        private fun getResourceId(itemView: View, drawable: Drawable): Int {
-            val resources = itemView.context.resources
-            val packageName = itemView.context.packageName
-
-            return resources.getIdentifier(drawable.toString(), "drawable", packageName)
-        }
-
     }
 
 
@@ -125,7 +118,7 @@ class PokedexAdapter(private val context: Context, private val pokemonList: List
         windowManager.defaultDisplay.getMetrics(displayMetrics)
         val screenWidth = displayMetrics.widthPixels
         val screenHeight = displayMetrics.heightPixels
-        val itemWidth = (screenWidth / 3) - (2 * 10) // Adjust the left and right margin as needed
+        val itemWidth = (screenWidth / 3) - (2* 20) // Adjust the left and right margin as needed
         val itemHeight = (screenHeight * 0.3).toInt() // Adjust the percentage as needed
         if (viewType == ITEM_TYPE_ONE) {
             val relativeLayout = view.findViewById<RelativeLayout>(R.id.singleItemLayout)
@@ -141,7 +134,6 @@ class PokedexAdapter(private val context: Context, private val pokemonList: List
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        Log.e("RUNTIME", "CREATED")
         val view = when (viewType) {
             ITEM_TYPE_ONE -> inflater.inflate(R.layout.single_type_pokemon, parent, false)
             ITEM_TYPE_TWO -> inflater.inflate(R.layout.duo_type_pokemon, parent, false)
@@ -193,7 +185,6 @@ class PokedexAdapter(private val context: Context, private val pokemonList: List
                         50
                     )
                 })
-                Log.e("RUNTIME", pokemonList[position].imageSource.toString())
                 Glide.with(viewHolderTwo.itemView)
                     .load(pokemonList[position].imageSource)
                     .into(viewHolderTwo.animated_sprites)

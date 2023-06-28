@@ -10,9 +10,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.pokedex.R
-import java.util.PriorityQueue
 
-class EvolutionAdapter(private var pokemonList: PriorityQueue<PokeEvo>) :
+class EvolutionAdapter(private var pokemonList: MutableList<PokeEvo>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     // Create a ViewHolder class
@@ -64,7 +63,7 @@ class EvolutionAdapter(private var pokemonList: PriorityQueue<PokeEvo>) :
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val pokemon = pokemonList.poll()
+        val pokemon = pokemonList[position]
         when (holder) {
             is ViewHolderBegin -> pokemon.let(holder::bind)
             is ViewHolderEnd -> pokemon.let(holder::bind)

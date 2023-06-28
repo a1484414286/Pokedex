@@ -16,55 +16,49 @@
 
         <TextView
             android:id="@+id/abilities"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:text="@string/abilities"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Abilities"
+            app:layout_constraintBottom_toTopOf="@+id/abilitiesLayout"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0" />
-        <!--three abilities-->
+            app:layout_constraintVertical_bias="0.5" />
 
-        <TextView
-            android:id="@+id/ability3"
-            android:layout_width="80dp"
-            android:layout_height="50dp"
-            android:background="@drawable/roundball"
-            android:text="ability3"
+        <!-- Abilities -->
+        <LinearLayout
+            android:id="@+id/abilitiesLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:gravity="center"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/ability1"
-            app:layout_constraintTop_toBottomOf="@id/abilities"
-            app:layout_constraintVertical_bias="0.03" />
-
-
-        <TextView
-            android:id="@+id/ability1"
-            android:layout_width="80dp"
-            android:layout_height="50dp"
-            android:background="@drawable/roundball"
-            android:text="ability1"
-            android:gravity="center"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/ability3"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/abilities"
-            app:layout_constraintVertical_bias="0.029" />
+            app:layout_constraintTop_toBottomOf="@id/abilities">
 
-        <TextView
-            android:id="@+id/ability2"
-            android:layout_width="80dp"
-            android:layout_height="50dp"
-            android:background="@drawable/roundball"
-            android:gravity="center"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/abilities"
-            app:layout_constraintVertical_bias="0.03" />
+            <TextView
+                android:id="@+id/ability1"
+                android:layout_width="80dp"
+                android:layout_height="50dp"
+                android:background="@drawable/roundball"
+                android:gravity="center"
+                android:text="ability1" />
 
+            <TextView
+                android:id="@+id/ability2"
+                android:layout_width="80dp"
+                android:layout_height="50dp"
+                android:background="@drawable/roundball"
+                android:gravity="center" />
+
+            <TextView
+                android:id="@+id/ability3"
+                android:layout_width="80dp"
+                android:layout_height="50dp"
+                android:background="@drawable/roundball"
+                android:gravity="center"
+                android:text="ability3" />
+
+        </LinearLayout>
         <!--Height, BaseEXP, Weight-->
         <TextView
             android:id="@+id/weightTag"
@@ -73,9 +67,9 @@
             android:text="Weight"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.34"
+            app:layout_constraintHorizontal_bias="0.2"
             app:layout_constraintStart_toEndOf="@+id/baseEXPTag"
-            app:layout_constraintTop_toBottomOf="@+id/ability3"
+            app:layout_constraintTop_toBottomOf="@+id/abilitiesLayout"
             app:layout_constraintVertical_bias="0.2" />
 
         <TextView
@@ -85,10 +79,12 @@
             android:text="Height"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.23"
+            app:layout_constraintHorizontal_bias="0.28"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ability1"
+            app:layout_constraintTop_toBottomOf="@id/abilitiesLayout"
             app:layout_constraintVertical_bias="0.2" />
+
+
 
         <TextView
             android:id="@+id/baseEXPTag"
@@ -99,46 +95,62 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ability1"
+            app:layout_constraintTop_toBottomOf="@id/abilitiesLayout"
             app:layout_constraintVertical_bias="0.2" />
 
         <!--Text View associate with tags-->
-        <TextView
-            android:id="@+id/heightData"
-            android:layout_width="80dp"
-            android:layout_height="20dp"
-            android:background="@drawable/roundball"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.2"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/heightTag"
-            app:layout_constraintVertical_bias="0.03" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/aboutStats"
+            android:gravity="center"
+            app:layout_constraintTop_toBottomOf="@id/baseEXPTag"
+            >
+
+            <TextView
+                android:id="@+id/heightData"
+                android:layout_width="80dp"
+                android:layout_height="20dp"
+                android:background="@drawable/roundball"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.2"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/heightTag"
+                app:layout_constraintVertical_bias="0.03"
+                android:gravity="center"
+                />
 
 
-        <TextView
-            android:id="@+id/baseEXPData"
-            android:layout_width="80dp"
-            android:layout_height="20dp"
-            android:background="@drawable/roundball"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/baseEXPTag"
-            app:layout_constraintVertical_bias="0.03" />
+            <TextView
+                android:id="@+id/baseEXPData"
+                android:layout_width="80dp"
+                android:layout_height="20dp"
+                android:background="@drawable/roundball"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/baseEXPTag"
+                app:layout_constraintVertical_bias="0.03"
+                android:gravity="center"
+                />
 
-        <TextView
-            android:id="@+id/weightText"
-            android:layout_width="80dp"
-            android:layout_height="20dp"
-            android:background="@drawable/roundball"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.80"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/weightTag"
-            app:layout_constraintVertical_bias="0.03" />
+            <TextView
+                android:id="@+id/weightText"
+                android:layout_width="80dp"
+                android:layout_height="20dp"
+                android:background="@drawable/roundball"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.80"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/weightTag"
+                app:layout_constraintVertical_bias="0.03"
+                android:gravity="center"
+                />
+        </LinearLayout>
 
 
         <!--        weakness-->
@@ -146,33 +158,31 @@
             android:id="@id/evolutionTag"
             android:layout_width="80dp"
             android:layout_height="20dp"
+            android:gravity="center"
             android:text="Evolution"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/baseEXPData"
+            app:layout_constraintTop_toBottomOf="@+id/aboutStats"
             app:layout_constraintVertical_bias="0.3" />
-
-
-
 
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/evolutionTag"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@id/evolutionTag">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewEvolution"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/evolutionTag"
+                android:layout_gravity="center_horizontal"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:layout_gravity="center_horizontal"
-                android:orientation="horizontal" />
+                app:layout_constraintTop_toBottomOf="@id/evolutionTag" />
 
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

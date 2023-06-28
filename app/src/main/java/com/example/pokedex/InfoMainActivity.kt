@@ -18,8 +18,6 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import java.util.Comparator
-import java.util.PriorityQueue
 
 
 @Suppress("UNCHECKED_CAST")
@@ -27,8 +25,9 @@ class InfoMainActivity : AppCompatActivity() {
     private lateinit var viewPager : ViewPager2
     private lateinit var tabLayout: TabLayout
     private lateinit var pageAdapter : PageAdapter
-    private lateinit var evolutionList : PriorityQueue<PokeEvo>
+    private lateinit var evolutionList : ArrayList<PokeEvo>
     private lateinit var abilitiesList : ArrayList<Ability>
+    private lateinit var aboutStats : HashMap<String,Any>
 
     private lateinit var id : String
     private lateinit var name : String
@@ -41,13 +40,12 @@ class InfoMainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
         setContentView(R.layout.status_page)
-        evolutionList = PriorityQueue(Comparator(PokeEvoComparator))
+        evolutionList = ArrayList()
         abilitiesList = ArrayList()
+        aboutStats = HashMap()
         receiveDataFromPreviousActivity()
         tabsContentSwitch()
     }
-
-
 
     private fun loadDataFromDB(
         index: Int,
@@ -115,8 +113,13 @@ class InfoMainActivity : AppCompatActivity() {
             .load(drawableResourceId)
             .into(imageView)
 
-        loadDataFromDB(id.toInt()) { abilities, _, effort, moves, stats, height, weight, evolutionMap->
+        loadDataFromDB(id.toInt()) { abilities, XP, effort, moves, stats, height, weight, evolutionMap->
             // update ui based on data called back from fetch
+
+            aboutStats["base_exp"] = XP
+            aboutStats["height"] = height
+            aboutStats["weight"] = weight
+
             abilities.let { list ->
                 for(ability in list.keys) {
                     val name =  ability as String
@@ -156,13 +159,12 @@ class InfoMainActivity : AppCompatActivity() {
             {
                 for(key in evolutionMap.keys)
                 {
+                    val id = key.toString().toInt()
                     val detailedMap = evolutionMap[key] as HashMap<*,*>
-                    evolutionList.add(
-                        PokeEvo(
-                            key.toString().toInt(), detailedMap["minLevel"] as Long,
-                        detailedMap["trigger"] as String, detailedMap["priority"] as Long
-                    )
-                    )
+                    evolutionList.add(PokeEvo(
+                        fetchResourceID(key.toString()), detailedMap["minLevel"] as Long,
+                    detailedMap["trigger"] as String, detailedMap["priority"] as Long
+                    ))
                 }
             }
 
@@ -171,11 +173,9 @@ class InfoMainActivity : AppCompatActivity() {
                 for(i in 1 until evolutionMap.size)
                 {
                     val detailedMap = evolutionMap[i] as HashMap<*,*>
-                    evolutionList.add(
-                        PokeEvo(i, detailedMap["minLevel"] as Long,
-                        detailedMap["trigger"] as String, detailedMap["priority"] as Long
-                    )
-                    )
+                    evolutionList.add( PokeEvo(fetchResourceID(i.toString()), detailedMap["minLevel"] as Long,
+                    detailedMap["trigger"] as String, detailedMap["priority"] as Long
+                ))
                 }
 
             }
@@ -193,7 +193,7 @@ class InfoMainActivity : AppCompatActivity() {
         button.setImageDrawable(getDrawable(R.drawable.gender_switch))
         tabLayout = findViewById(R.id.tab_layout)
         viewPager = findViewById(R.id.view_pager)
-        pageAdapter = PageAdapter(supportFragmentManager,lifecycle,evolutionList,abilitiesList)
+        pageAdapter = PageAdapter(supportFragmentManager,lifecycle,evolutionList,abilitiesList,aboutStats)
         viewPager.adapter = pageAdapter
 
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {

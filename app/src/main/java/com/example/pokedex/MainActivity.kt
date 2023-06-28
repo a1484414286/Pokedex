@@ -19,6 +19,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -35,6 +36,7 @@ import kotlin.collections.HashMap
 class MainActivity : AppCompatActivity() {
     private lateinit var pokemonList: MutableList<Pokemon>
     private lateinit var recyclerView: RecyclerView
+
     private val database = Firebase.database
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,7 +66,7 @@ class MainActivity : AppCompatActivity() {
         myRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val value =
-                    dataSnapshot.value as HashMap<Any, Any>? // Retrieve the value from the snapshot
+                    dataSnapshot.value as HashMap<*, *>? // Retrieve the value from the snapshot
                 val name = value?.get("name") as? String
                 val types = value?.get("types") as? List<Any>
                 callback(name, types)
@@ -81,51 +83,53 @@ class MainActivity : AppCompatActivity() {
         val maxIndex = 807
         val scope = CoroutineScope(Dispatchers.Main)
         val sortedMap = ConcurrentHashMap<Int, Pokemon>()
+        val deferred = CompletableDeferred<Unit>()
+
+        val startTime = System.currentTimeMillis()
 
         for (index in 1..maxIndex) {
             scope.launch {
                 var drawableName = "p${index}"
-                val drawableResourceId = resources.getIdentifier(drawableName, "drawable", packageName)
+                var drawableResourceId = resources.getIdentifier(drawableName, "drawable", packageName)
 
                 if (drawableResourceId == 0) {
                     drawableName = "p${index}_f"
-                    val drawableResourceId =
-                        resources.getIdentifier(drawableName, "drawable", packageName)
-                    val drawable = ContextCompat.getDrawable(this@MainActivity, drawableResourceId)
-                    test(index) { name, types ->
-                        val p = Pokemon(
-                            drawableName.removePrefix("p").removeSuffix("_f").toInt(),
-                            drawable,
-                            name,
-                            types?.get(0).toString(),
-                            types?.getOrNull(1)?.toString() ?: ""
-                        )
+                    drawableResourceId = resources.getIdentifier(drawableName, "drawable", packageName)
+
+                }
+
+                val drawable = ContextCompat.getDrawable(this@MainActivity, drawableResourceId)
+
+                test(index) { name, types ->
+                    val p = Pokemon(
+                        drawableName.removePrefix("p").removeSuffix("_f").toInt(),
+                        drawable,
+                        name,
+                        types?.get(0).toString(),
+                        types?.getOrNull(1)?.toString() ?: ""
+                    )
+                    synchronized(sortedMap) {
                         sortedMap[index] = p
+
                         if (sortedMap.size == maxIndex) {
-                            pokemonList.addAll(sortedMap.values)
-                            recyclerView.adapter?.notifyDataSetChanged()
-                        }
-                    }
-                } else {
-                    val drawable = ContextCompat.getDrawable(this@MainActivity, drawableResourceId)
-                    test(index) { name, types ->
-                        val p = Pokemon(
-                            index,
-                            drawable,
-                            name,
-                            types?.get(0).toString(),
-                            types?.getOrNull(1)?.toString() ?: ""
-                        )
-                        sortedMap[index] = p
-                        if (sortedMap.size == maxIndex) {
-                            pokemonList.addAll(sortedMap.values)
-                            recyclerView.adapter?.notifyDataSetChanged()
+                            deferred.complete(Unit)
                         }
                     }
                 }
             }
         }
+
+        scope.launch {
+            deferred.await()
+
+            pokemonList.addAll(sortedMap.values)
+            recyclerView.adapter?.notifyDataSetChanged()
+
+            val endTime = System.currentTimeMillis()
+            Log.e("RUNTIME_ELAPSED", (endTime - startTime).toString())
+        }
     }
+
 
 //    @SuppressLint("DiscouragedApi")
 //    private fun addData() {
@@ -238,12 +242,12 @@ class MainActivity : AppCompatActivity() {
     }
     private fun fetchData(){
         val client = AsyncHttpClient()
-        val params = RequestParams()
+//        val params = RequestParams()
         val flag = false
         val movesFlag = false
-        params["limit"] = "5"
-        params["page"] = "0"
-//        val randomValue = (0..1009).random()
+//        params["limit"] = "5"
+//        params["page"] = "0"
+////        val randomValue = (0..1009).random()
         var index = 0
         while(index != 539) {
             val map = hashMapSetUp()
@@ -300,7 +304,6 @@ class MainActivity : AppCompatActivity() {
                                             "Female"
                                         }
                                     }
-                                    Log.e("RUNTIME",speciesName)
 
                                     val time = firstEvolution.optString("time_of_day").toString()
                                     val minHappiness = firstEvolution.optInt("min_happiness")
