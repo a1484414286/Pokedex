@@ -14,7 +14,7 @@ class PageAdapter(
     lifecycle: Lifecycle,
     private val aboutFragMap: HashMap<String, Any>,
     private val statsFragMap: HashMap<String, HashMap<String, Long>>,
-    private val movesFragMap: HashMap<Int, Move>
+    private val movesFragMap: ArrayList<Move>
 ) :
     FragmentStateAdapter(fragmentManager, lifecycle) {
 

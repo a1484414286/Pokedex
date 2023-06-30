@@ -33,7 +33,7 @@ class InfoMainActivity : AppCompatActivity() {
 
     private lateinit var aboutFragMap : HashMap<String, Any>
     private lateinit var statsFragMap : HashMap<String, HashMap<String,Long>>
-    private lateinit var movesFragMap : HashMap<Int, Move>
+    private lateinit var movesFragMap : ArrayList<Move>
 
     private lateinit var id : String
     private lateinit var name : String
@@ -52,7 +52,7 @@ class InfoMainActivity : AppCompatActivity() {
 
         aboutFragMap = HashMap()
         statsFragMap = HashMap()
-        movesFragMap = HashMap()
+        movesFragMap = ArrayList()
         receiveDataFromPreviousActivity()
         tabsContentSwitch()
     }
@@ -143,7 +143,7 @@ class InfoMainActivity : AppCompatActivity() {
             }
 
             moves.let { movesMap ->
-                for((index, key) in movesMap.keys.withIndex()) {
+                for(key in movesMap.keys) {
                     val name = key
                     val move = movesMap[key]
                     val accuracy = move?.get("accuracy") as Long
@@ -152,7 +152,7 @@ class InfoMainActivity : AppCompatActivity() {
                     val pp = move["pp"] as Long
                     val type = move["type"] as String
                     val category = move["category"] as String
-                    movesFragMap[index] = Move(lvlReq,name,category,type,power, accuracy,pp)
+                    movesFragMap.add(Move(lvlReq,name,category,type,power, accuracy,pp))
                 }
             }
 

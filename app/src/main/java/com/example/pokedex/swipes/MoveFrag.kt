@@ -16,7 +16,7 @@ import com.example.pokedex.data_class.Move
  * Use the [MoveFrag.newInstance] factory method to
  * create an instance of this fragment.
  */
-class MoveFrag(var movesFragMap: Map<Int, Move>) : Fragment() {
+class MoveFrag(var movesFragMap: ArrayList<Move>) : Fragment() {
     private lateinit var moveAdapter : MoveAdapter
     private lateinit var recyclerView: RecyclerView
 
@@ -27,7 +27,7 @@ class MoveFrag(var movesFragMap: Map<Int, Move>) : Fragment() {
         val rootView = inflater.inflate(R.layout.fragment_move, container, false)
         recyclerView = rootView.findViewById(R.id.moveRecycler)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        movesFragMap = movesFragMap.toList().sortedBy { it.second.lvl }.toMap()
+        movesFragMap.sortBy { it.lvl }
         moveAdapter = MoveAdapter(movesFragMap)
         recyclerView.adapter = moveAdapter
 

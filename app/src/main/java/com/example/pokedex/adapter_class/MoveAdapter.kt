@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.pokedex.R
 import com.example.pokedex.data_class.Move
 
-class MoveAdapter(private val moveList: Map<Int, Move>) : RecyclerView.Adapter<MoveAdapter.ViewHolder>(){
+class MoveAdapter(private val moveList: ArrayList<Move>) : RecyclerView.Adapter<MoveAdapter.ViewHolder>(){
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.single_move, parent, false)
 
