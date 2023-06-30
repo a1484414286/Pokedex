@@ -1,17 +1,21 @@
 package com.example.pokedex
 
-import com.example.pokedex.data_class.PokeEvo
 import android.annotation.SuppressLint
+import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
-import com.example.pokedex.data_class.Ability
 import com.example.pokedex.adapter_class.PageAdapter
+import com.example.pokedex.data_class.Ability
 import com.example.pokedex.data_class.Move
+import com.example.pokedex.data_class.PokeEvo
+import com.example.pokedex.data_class.TypeIcons
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.FirebaseApp
 import com.google.firebase.database.DataSnapshot
@@ -26,10 +30,12 @@ class InfoMainActivity : AppCompatActivity() {
     private lateinit var viewPager : ViewPager2
     private lateinit var tabLayout: TabLayout
     private lateinit var pageAdapter : PageAdapter
+    private lateinit var types : HashMap<String, Int>
+
+
     private lateinit var evolutionList : ArrayList<PokeEvo>
     private lateinit var abilitiesList : ArrayList<Ability>
     private lateinit var aboutStats : HashMap<String,Any>
-
 
     private lateinit var aboutFragMap : HashMap<String, Any>
     private lateinit var statsFragMap : HashMap<String, HashMap<String,Long>>
@@ -39,6 +45,14 @@ class InfoMainActivity : AppCompatActivity() {
     private lateinit var name : String
     private lateinit var type1 : String
     private lateinit var type2 : String
+
+
+    private lateinit var imageView : ImageView
+    private lateinit var idView : TextView
+    private lateinit var nameView : TextView
+    private lateinit var typeView : ImageView
+    private lateinit var typeView2 : ImageView
+    private lateinit var genderView : ImageView
     private val database = Firebase.database
 
 
@@ -46,17 +60,74 @@ class InfoMainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
         setContentView(R.layout.status_page)
-        evolutionList = ArrayList()
-        abilitiesList = ArrayList()
-        aboutStats = HashMap()
-
-        aboutFragMap = HashMap()
-        statsFragMap = HashMap()
-        movesFragMap = ArrayList()
+        init()
+        viewSet()
         receiveDataFromPreviousActivity()
         tabsContentSwitch()
     }
 
+    private fun init()
+    {
+        evolutionList = ArrayList()
+        abilitiesList = ArrayList()
+        aboutStats = HashMap()
+        aboutFragMap = HashMap()
+        statsFragMap = HashMap()
+        movesFragMap = ArrayList()
+        types = TypeIcons().hashTable()
+        id = intent.getStringExtra("id")!!
+        id = id.replace("§","").trim()
+        name = intent.getStringExtra("name")!!
+        type1 = intent.getStringExtra("type1")!!
+        type2 = intent.getStringExtra("type2") ?: ""
+
+
+        tabLayout = findViewById(R.id.tab_layout)
+        viewPager = findViewById(R.id.view_pager)
+        pageAdapter = PageAdapter(supportFragmentManager,lifecycle,aboutFragMap,statsFragMap,movesFragMap)
+        viewPager.adapter = pageAdapter
+
+        genderView = findViewById<ImageButton>(R.id.genderSwitch)
+        imageView = findViewById(R.id.pokedexAvatar)
+        idView = findViewById(R.id.pokedexID)
+        nameView = findViewById(R.id.pokedexPokemonName)
+        typeView = findViewById(R.id.type1)
+        typeView2 = findViewById(R.id.type2)!!
+
+    }
+
+    private fun viewSet()
+    {
+        val stringBuilder = StringBuilder()
+        stringBuilder.append("§ ").append(id)
+        val convertedString = stringBuilder.toString()
+        idView.text = convertedString
+        nameView.text = name
+
+        Glide.with(this)
+            .asGif()
+            .load(R.drawable.gender_switch)
+            .into(genderView)
+
+
+        typeView.setImageDrawable(getDrawable(type1))
+
+        if(type2 != "")
+        {
+            typeView2.setImageDrawable(getDrawable(type2))
+        }
+        else
+        {
+            typeView2.visibility = View.GONE
+        }
+    }
+
+
+    private fun getDrawable(type : String): Drawable? {
+        val resourceId = resources.getIdentifier(type, "drawable", packageName)
+        val drawable = ContextCompat.getDrawable(this, resourceId)
+        return drawable
+    }
     private fun loadDataFromDB(
         index: Int,
         callback: (
@@ -110,14 +181,6 @@ class InfoMainActivity : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     private fun receiveDataFromPreviousActivity()
     {
-        id = intent.getStringExtra("id")!!
-        name = intent.getStringExtra("name")!!
-        type1 = intent.getStringExtra("type1")!!
-        type2 = intent.getStringExtra("type2") ?: ""
-        id = id.replace("§","").trim()
-        val imageView = findViewById<ImageView>(R.id.pokedexAvatar)
-        findViewById<TextView>(R.id.pokedexID).text = "§  ${this.id}"
-        findViewById<TextView>(R.id.pokedexPokemonName).text = name
         val drawableResourceId= fetchResourceID(id)
         Glide.with(this)
             .load(drawableResourceId)
@@ -195,12 +258,7 @@ class InfoMainActivity : AppCompatActivity() {
     private fun tabsContentSwitch()
     {
 
-        val button = findViewById<ImageButton>(R.id.genderSwitch)
-        button.setImageDrawable(getDrawable(R.drawable.gender_switch))
-        tabLayout = findViewById(R.id.tab_layout)
-        viewPager = findViewById(R.id.view_pager)
-        pageAdapter = PageAdapter(supportFragmentManager,lifecycle,aboutFragMap,statsFragMap,movesFragMap)
-        viewPager.adapter = pageAdapter
+
 
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {

@@ -42,38 +42,36 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/genderSwitch" />
 
-    <ImageButton
-        android:id="@+id/type1"
-        android:layout_width="50dp"
-        android:layout_height="30dp"
-        android:background="@drawable/icon_round_box"
-        android:scaleType="fitCenter"
+    <LinearLayout
+        android:id="@+id/types"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.4"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/pokedexAvatar" />
+        app:layout_constraintTop_toBottomOf="@id/pokedexAvatar"
+        >
+        <ImageButton
+            android:id="@+id/type1"
+            android:layout_width="80dp"
+            android:layout_height="50dp"
+            android:background="@drawable/icon_round_box"
+            android:scaleType="fitCenter"
+            android:layout_gravity="center"
+            />
 
-    <ImageButton
-        android:id="@+id/type2"
-        android:layout_width="50dp"
-        android:layout_height="30dp"
-        android:background="@drawable/icon_round_box"
-        android:scaleType="fitCenter"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.3"
-        app:layout_constraintStart_toStartOf="@id/type1"
-        app:layout_constraintTop_toBottomOf="@id/pokedexAvatar" />
+        <ImageButton
+            android:id="@+id/type2"
+            android:layout_width="80dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="16dp"
+            android:background="@drawable/icon_round_box"
+            android:scaleType="fitCenter"
+            android:layout_gravity="center"
+            />
 
-    <ImageButton
-        android:id="@+id/typeOnly"
-        android:layout_width="50dp"
-        android:layout_height="30dp"
-        android:background="@drawable/icon_round_box"
-        android:scaleType="fitCenter"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.15"
-        app:layout_constraintStart_toStartOf="@id/type1"
-        app:layout_constraintTop_toBottomOf="@id/pokedexAvatar" />
+    </LinearLayout>
+
 
 
     <TextView
@@ -119,7 +117,7 @@
         android:layout_alignParentEnd="true"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/type1">
+        app:layout_constraintTop_toBottomOf="@id/types">
 
             <com.google.android.material.tabs.TabItem
                 android:id="@+id/about"

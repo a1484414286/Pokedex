@@ -20,35 +20,18 @@ import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.graphics.drawable.toBitmap
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.pokedex.InfoMainActivity
 import com.example.pokedex.R
+import com.example.pokedex.data_class.TypeIcons
+import java.io.ByteArrayOutputStream
 
 
 class PokedexAdapter(private val context: Context, private val pokemonList: List<Pokemon>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    private val hashTable: HashMap<String, Int> = HashMap<String, Int>().apply {
-        R.drawable.normal.let { put("normal", it) }
-        R.drawable.fire.let { put("fire", it) }
-        R.drawable.flying.let { put("flying", it) }
-        R.drawable.psychic.let { put("psychic", it) }
-        R.drawable.water.let { put("water", it) }
-        R.drawable.bug.let { put("bug", it) }
-        R.drawable.grass.let { put("grass", it) }
-        R.drawable.rock.let { put("rock", it) }
-        R.drawable.electric.let { put("electric", it) }
-        R.drawable.ghost.let { put("ghost", it) }
-        R.drawable.ice.let { put("ice", it) }
-        R.drawable.dark.let { put("dark", it) }
-        R.drawable.fighting.let { put("fighting", it) }
-        R.drawable.dragon.let { put("dragon", it) }
-        R.drawable.poison.let { put("poison", it) }
-        R.drawable.steel.let { put("steel", it) }
-        R.drawable.ground.let { put("ground", it) }
-        R.drawable.fairy.let { put("fairy", it) }
-    }
-
+    private val hashTable = TypeIcons().hashTable() as HashMap<String,Int>
     companion object {
         private const val ITEM_TYPE_ONE = 1
         private const val ITEM_TYPE_TWO = 2
@@ -60,6 +43,7 @@ class PokedexAdapter(private val context: Context, private val pokemonList: List
         val name: TextView
         val animated_sprites: ImageView
         val type1: ImageButton
+        var type1Name : String = ""
 
         init {
             // Find our RecyclerView item's ImageView for future use
@@ -67,11 +51,12 @@ class PokedexAdapter(private val context: Context, private val pokemonList: List
             name = view.findViewById(R.id.pokemonName)
             animated_sprites = view.findViewById(R.id.pokemonImage)
             type1 = view.findViewById(R.id.type1)
+
             view.setOnClickListener {
                 var intent = Intent(view.context, InfoMainActivity::class.java)
                 intent.putExtra("id", id.text)
                 intent.putExtra("name", name.text)
-                intent.putExtra("type1", type1.drawable.toString())
+                intent.putExtra("type1", type1Name)
                 view.context.startActivity(intent)
             }
 
@@ -86,6 +71,8 @@ class PokedexAdapter(private val context: Context, private val pokemonList: List
         val animated_sprites: ImageView
         val type1: ImageButton
         val type2: ImageButton
+        var type1Name : String = ""
+        var type2Name : String = ""
 
         init {
             id = view.findViewById(R.id.Id)
@@ -97,17 +84,17 @@ class PokedexAdapter(private val context: Context, private val pokemonList: List
 
 
             view.setOnClickListener {
-
                 var intent = Intent(view.context, InfoMainActivity::class.java)
                 intent.putExtra("id", id.text)
                 intent.putExtra("name", name.text)
-                intent.putExtra("type1", type1.drawable.toString())
-                intent.putExtra("type2", type2.drawable.toString())
+                intent.putExtra("type1", type1Name)
+                intent.putExtra("type2", type2Name)
                 view.context.startActivity(intent)
             }
         }
 
     }
+
 
 
     private fun adjustRelativeLayoutSize(view: View, viewType: Int) {
@@ -154,6 +141,7 @@ class PokedexAdapter(private val context: Context, private val pokemonList: List
                 val viewHolderOne = holder as ViewHolderOne
                 viewHolderOne.id.text = "§ " + pokemonList[position].id.toString()
                 viewHolderOne.name.text = pokemonList[position].name
+                viewHolderOne.type1Name = pokemonList[position].type1
                 viewHolderOne.type1.setImageDrawable(
                     hashTable[pokemonList[position].type1]
 
@@ -167,6 +155,8 @@ class PokedexAdapter(private val context: Context, private val pokemonList: List
                 val viewHolderTwo = holder as ViewHolderTwo
                 viewHolderTwo.id.text = "§ " + pokemonList[position].id.toString()
                 viewHolderTwo.name.text = pokemonList[position].name
+                viewHolderTwo.type1Name = pokemonList[position].type1
+                viewHolderTwo.type2Name = pokemonList[position].type2
                 viewHolderTwo.type1.setImageDrawable(hashTable[pokemonList[position].type1]?.let {
                     resizeImageToFit(
                         context,

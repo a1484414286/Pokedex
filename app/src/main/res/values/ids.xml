@@ -6,4 +6,7 @@
     <item name="ability3" type="id" />
     <item name="weaknessTag" type="id" />
     <item name="evolutionTag" type="id" />
+    <item name="about" type="id" />
+    <item name="stats" type="id" />
+    <item name="moves" type="id" />
 </resources>
