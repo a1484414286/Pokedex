@@ -5,47 +5,47 @@
     >
 
     <TextView
-        android:id="@+id/levelCol"
+        android:id="@+id/levelFill"
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_weight="1"
         android:gravity="center"
     />
     <TextView
-        android:id="@+id/moveNameCol"
+        android:id="@+id/moveNameFill"
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:gravity="center"
         android:layout_weight="2"
     />
     <ImageView
-        android:id="@+id/typeCol"
+        android:id="@+id/typeFill"
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_weight="1"
     />
     <ImageView
-        android:id="@+id/categoryCol"
+        android:id="@+id/categoryFill"
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_weight="1"
     />
     <TextView
-        android:id="@+id/powerCol"
+        android:id="@+id/powerFill"
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_weight="1"
         android:gravity="center"
         />
     <TextView
-        android:id="@+id/accuracyCol"
+        android:id="@+id/accuracyFill"
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_weight="1"
         android:gravity="center"
         />
     <TextView
-        android:id="@+id/ppCol"
+        android:id="@+id/ppFill"
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_weight="1"
