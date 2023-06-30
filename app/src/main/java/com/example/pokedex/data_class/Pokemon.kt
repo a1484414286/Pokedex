@@ -1,3 +1,5 @@
+package com.example.pokedex.data_class
+
 import android.graphics.drawable.Drawable
 
 data class Pokemon(

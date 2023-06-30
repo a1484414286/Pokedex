@@ -1,6 +1,6 @@
 package com.example.pokedex
 
-import Pokemon
+import com.example.pokedex.data_class.Pokemon
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
@@ -9,10 +9,9 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.codepath.asynchttpclient.AsyncHttpClient
-import com.codepath.asynchttpclient.RequestParams
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler
-import com.example.pokedex.evolution.EvolutionData
-import com.example.pokedex.main.PokedexAdapter
+import com.example.pokedex.data_class.EvolutionData
+import com.example.pokedex.adapter_class.PokedexAdapter
 import com.google.firebase.FirebaseApp
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -135,7 +134,7 @@ class MainActivity : AppCompatActivity() {
 //    private fun addData() {
 //        val maxIndex = 807
 //        val scope = CoroutineScope(Dispatchers.Main)
-//        val sortedMap: SortedMap<Int, Pokemon> = Collections.synchronizedSortedMap(TreeMap())
+//        val sortedMap: SortedMap<Int, com.example.pokedex.data_class.Pokemon> = Collections.synchronizedSortedMap(TreeMap())
 //
 //        for (index in 1..maxIndex) {
 //            scope.launch {
@@ -148,7 +147,7 @@ class MainActivity : AppCompatActivity() {
 //                        resources.getIdentifier(drawableName, "drawable", packageName)
 //                    val drawable = ContextCompat.getDrawable(this@MainActivity, drawableResourceId)
 //                    test(index) { name, types ->
-//                        val p = Pokemon(
+//                        val p = com.example.pokedex.data_class.Pokemon(
 //                            drawableName.removePrefix("p").removeSuffix("_f").toInt(),
 //                            drawable,
 //                            name,
@@ -165,7 +164,7 @@ class MainActivity : AppCompatActivity() {
 //                } else {
 //                    val drawable = ContextCompat.getDrawable(this@MainActivity, drawableResourceId)
 //                    test(index) { name, types ->
-//                        val p = Pokemon(
+//                        val p = com.example.pokedex.data_class.Pokemon(
 //                            index,
 //                            drawable,
 //                            name,
@@ -202,10 +201,9 @@ class MainActivity : AppCompatActivity() {
 //        map["abilities"] = HashMap<String, Boolean>()
 //        map["types"] = ArrayList<String>()
 //        map["stats"] = HashMap<String, Int>()
-//        map["moves"] = HashMap<Any, Any>()
 //        map["effort"] = HashMap<String, Int>()
-//        map["moves"] = HashMap<String, HashMap<String, Any>>()
-        map["evolution"] = HashMap<Any,Any>()
+        map["moves"] = HashMap<String, HashMap<String, Any>>()
+//        map["evolution"] = HashMap<Any,Any>()
         return map
 
     }
@@ -213,13 +211,13 @@ class MainActivity : AppCompatActivity() {
         for (element in evolutionDataList) {
             val pokemonId = element.id
 
-            // Create a new child reference for the Pokemon ID
+            // Create a new child reference for the com.example.pokedex.data_class.Pokemon ID
             val pokemonChildRef = database.getReference(pokemonId)
 
-            // Create a map for the Pokemon's data
+            // Create a map for the com.example.pokedex.data_class.Pokemon's data
             val pokemonData = hashMapOf<String, Any>()
 
-            // Add the evolution data for each Pokemon ID
+            // Add the evolution data for each com.example.pokedex.data_class.Pokemon ID
             for (evolutionData in evolutionDataList) {
                 pokemonData[evolutionData.id] = hashMapOf(
                     "name" to evolutionData.name,
@@ -236,25 +234,25 @@ class MainActivity : AppCompatActivity() {
             }
             map["evolution"] = pokemonData
 
-            // Set the data for the Pokemon
+            // Set the data for the com.example.pokedex.data_class.Pokemon
             pokemonChildRef.updateChildren(map)
         }
     }
     private fun fetchData(){
         val client = AsyncHttpClient()
 //        val params = RequestParams()
-        val flag = false
-        val movesFlag = false
+        val evolutionFlag = true
+        val movesFlag = true
 //        params["limit"] = "5"
 //        params["page"] = "0"
 ////        val randomValue = (0..1009).random()
-        var index = 0
-        while(index != 539) {
+        var index = 799
+        while(index != 1011) {
             val map = hashMapSetUp()
 
             client.run {
 
-                if(!flag){
+                if(!evolutionFlag){
                 get(/* url = */"https://pokeapi.co/api/v2/evolution-chain/$index",
                     object : JsonHttpResponseHandler()
                     {
@@ -419,7 +417,7 @@ class MainActivity : AppCompatActivity() {
                 )
                 }
 
-                if(flag)
+                if(evolutionFlag)
                 {
 
                 get("https://pokeapi.co/api/v2/pokemon/$index", object : JsonHttpResponseHandler() {
@@ -428,50 +426,51 @@ class MainActivity : AppCompatActivity() {
                         headers: Headers,
                         json: JsonHttpResponseHandler.JSON
                     ) {
+
                         var jsonList = json.jsonObject
                         val myRef = database.getReference(jsonList.get("id").toString())
-                        val jsonArr: JSONArray = jsonList.get("abilities") as JSONArray
-                        var abilitiesMap = map["abilities"] as HashMap<String, Boolean>;
-                        for (i in 0 until jsonArr.length()) {
-                            val abilities = jsonArr.get(i) as JSONObject
-                            val ability = abilities.get("ability") as JSONObject
-                            val hidden = abilities.get("is_hidden") as Boolean
-                            val name = ability.get("name") as String
-                            abilitiesMap[name] = hidden
-                        }
-
-                        val types = jsonList.get("types") as JSONArray;
-                        var typesArr = map["types"] as ArrayList<String>;
-                        for (i in 0 until types.length()) {
-                            val typeSlots = types.get(i) as JSONObject
-                            val type = typeSlots.get("type") as JSONObject
-                            val typeName = type.get("name") as String
-                            typesArr.add(typeName)
-                        }
-
-                        val minLevel = if (jsonList.isNull("base_experience")) {
-                            0 // Default value when "min_level" is null
-                        } else {
-                            jsonList.get("base_experience")
-                        }
-                        map["base_exp"] = minLevel
-
-                        map["name"] = jsonList.get("name")
-
-                        map["height"] = jsonList.get("height")
-                        map["weight"] = jsonList.get("weight")
-                        val statsArr = jsonList.get("stats") as JSONArray;
-                        val stats: HashMap<String, Int> = map["stats"] as HashMap<String, Int>
-                        val effort: HashMap<String, Int> = map["effort"] as HashMap<String, Int>;
-                        for (i in 0 until statsArr.length()) {
-                            val genStats = statsArr.get(i) as JSONObject
-                            val value = genStats.get("base_stat") as Int
-                            val baseStats = genStats.get("stat") as JSONObject
-                            val baseStatsName = baseStats.get("name") as String
-                            stats[baseStatsName] = value
-                            val effortVal = genStats.get("effort") as Int
-                            effort[baseStatsName] = effortVal
-                        }
+//                        val jsonArr: JSONArray = jsonList.get("abilities") as JSONArray
+//                        var abilitiesMap = map["abilities"] as HashMap<String, Boolean>;
+//                        for (i in 0 until jsonArr.length()) {
+//                            val abilities = jsonArr.get(i) as JSONObject
+//                            val ability = abilities.get("ability") as JSONObject
+//                            val hidden = abilities.get("is_hidden") as Boolean
+//                            val name = ability.get("name") as String
+//                            abilitiesMap[name] = hidden
+//                        }
+//
+//                        val types = jsonList.get("types") as JSONArray;
+//                        var typesArr = map["types"] as ArrayList<String>;
+//                        for (i in 0 until types.length()) {
+//                            val typeSlots = types.get(i) as JSONObject
+//                            val type = typeSlots.get("type") as JSONObject
+//                            val typeName = type.get("name") as String
+//                            typesArr.add(typeName)
+//                        }
+//
+//                        val minLevel = if (jsonList.isNull("base_experience")) {
+//                            0 // Default value when "min_level" is null
+//                        } else {
+//                            jsonList.get("base_experience")
+//                        }
+//                        map["base_exp"] = minLevel
+//
+//                        map["name"] = jsonList.get("name")
+//
+//                        map["height"] = jsonList.get("height")
+//                        map["weight"] = jsonList.get("weight")
+//                        val statsArr = jsonList.get("stats") as JSONArray;
+//                        val stats: HashMap<String, Int> = map["stats"] as HashMap<String, Int>
+//                        val effort: HashMap<String, Int> = map["effort"] as HashMap<String, Int>;
+//                        for (i in 0 until statsArr.length()) {
+//                            val genStats = statsArr.get(i) as JSONObject
+//                            val value = genStats.get("base_stat") as Int
+//                            val baseStats = genStats.get("stat") as JSONObject
+//                            val baseStatsName = baseStats.get("name") as String
+//                            stats[baseStatsName] = value
+//                            val effortVal = genStats.get("effort") as Int
+//                            effort[baseStatsName] = effortVal
+//                        }
                         if(movesFlag)
                         {
 
@@ -486,9 +485,14 @@ class MainActivity : AppCompatActivity() {
                             val moveName = move.getString("name")
                             val versionGroupDetails =
                                 moves.getJSONObject(i).getJSONArray("version_group_details")
+                            Log.e("RUNTIME_LENGTH", versionGroupDetails.toString())
+
 
                             for (j in 0 until versionGroupDetails.length()) {
                                 val moveSetTypes = versionGroupDetails.getJSONObject(j)
+                                val levelLearnedAt = moveSetTypes.getInt("level_learned_at")
+//                                Log.e("RUNTIME",index.toString())
+
                                 val moveLearnMethod =
                                     moveSetTypes.getJSONObject("move_learn_method")
                                 val moveLearnName = moveLearnMethod.getString("name")
@@ -501,13 +505,15 @@ class MainActivity : AppCompatActivity() {
                                     moveStatsMap["type"] = 0
                                     moveStatsMap["pp"] = 0
                                     moveStatsMap["lvl"] = 0
+                                    moveStatsMap["category"] = ""
 
                                     // Add moveStatsMap to movesMap
                                     movesMap[moveName] = moveStatsMap
 
+
                                     // Make the HTTP request
                                     val url = move.getString("url").toString()
-                                    get(move.getString("url"), object : JsonHttpResponseHandler() {
+                                    get(url, object : JsonHttpResponseHandler() {
                                         override fun onFailure(
                                             statusCode: Int,
                                             headers: Headers?,
@@ -540,6 +546,8 @@ class MainActivity : AppCompatActivity() {
                                             val dmgType = dmg_class.get("name")
                                             var pp = jsonList.get("pp")
                                             var power = jsonList.get("power")
+                                            var category = jsonList.get("type") as JSONObject
+                                            var categoryName = category.get("name")
                                             // Update moveStatsMap
                                             if (accuracy is JSONObject || accuracy.equals(
                                                     null
@@ -559,10 +567,16 @@ class MainActivity : AppCompatActivity() {
                                             ) {
                                                 pp = 0;
                                             }
+
                                             moveStatsMap["accuracy"] = accuracy
                                             moveStatsMap["type"] = dmgType
                                             moveStatsMap["pp"] = pp
                                             moveStatsMap["power"] = power
+                                            moveStatsMap["category"] = categoryName
+                                            if(levelLearnedAt != 0 )
+                                            {
+                                                moveStatsMap["lvl"] = levelLearnedAt
+                                            }
                                             myRef.updateChildren(map)
 
 

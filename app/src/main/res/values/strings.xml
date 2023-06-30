@@ -6,4 +6,12 @@
     <string name="about">about</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="pp">PP</string>
+    <string name="acc">Acc.</string>
+    <string name="pwr">Pwr.</string>
+    <string name="cat">Cat.</string>
+    <string name="type">Type</string>
+    <string name="move">Move</string>
+    <string name="level">Level</string>
+    <string name="stats">stats</string>
 </resources>

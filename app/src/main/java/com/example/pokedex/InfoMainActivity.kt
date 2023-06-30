@@ -1,6 +1,6 @@
 package com.example.pokedex
 
-import com.example.pokedex.evolution.PokeEvo
+import com.example.pokedex.data_class.PokeEvo
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.ImageButton
@@ -9,8 +9,9 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
-import com.example.pokedex.main.Ability
-import com.example.pokedex.swipes.PageAdapter
+import com.example.pokedex.data_class.Ability
+import com.example.pokedex.adapter_class.PageAdapter
+import com.example.pokedex.data_class.Move
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.FirebaseApp
 import com.google.firebase.database.DataSnapshot
@@ -29,6 +30,11 @@ class InfoMainActivity : AppCompatActivity() {
     private lateinit var abilitiesList : ArrayList<Ability>
     private lateinit var aboutStats : HashMap<String,Any>
 
+
+    private lateinit var aboutFragMap : HashMap<String, Any>
+    private lateinit var statsFragMap : HashMap<String, HashMap<String,Long>>
+    private lateinit var movesFragMap : HashMap<Int, Move>
+
     private lateinit var id : String
     private lateinit var name : String
     private lateinit var type1 : String
@@ -43,6 +49,10 @@ class InfoMainActivity : AppCompatActivity() {
         evolutionList = ArrayList()
         abilitiesList = ArrayList()
         aboutStats = HashMap()
+
+        aboutFragMap = HashMap()
+        statsFragMap = HashMap()
+        movesFragMap = HashMap()
         receiveDataFromPreviousActivity()
         tabsContentSwitch()
     }
@@ -120,51 +130,43 @@ class InfoMainActivity : AppCompatActivity() {
             aboutStats["height"] = height
             aboutStats["weight"] = weight
 
+            statsFragMap["base"] = stats as java.util.HashMap<String, Long>
+            statsFragMap["effort"] = effort as java.util.HashMap<String, Long>
+
+
             abilities.let { list ->
                 for(ability in list.keys) {
-                    val name =  ability as String
+                    val name = ability
                     val bool = list[ability] as Boolean
                     abilitiesList.add(Ability(name,bool))
                 }
             }
 
-            effort.let { effortMap ->
-                for(key in effortMap.keys) {
-                    val name = key
-                    val value = effortMap[key]?.toInt()
-                }
-            }
-
             moves.let { movesMap ->
-                for(key in movesMap.keys) {
+                for((index, key) in movesMap.keys.withIndex()) {
                     val name = key
                     val move = movesMap[key]
-                    val accuracy = move?.get("accuracy")
-                    val lvlReq = move?.get("lvl")
-                    val power = move?.get("power")
-                    val pp = move?.get("pp")
-                    val type = move?.get("type")
+                    val accuracy = move?.get("accuracy") as Long
+                    val lvlReq = move["lvl"] as Long
+                    val power = move["power"] as Long
+                    val pp = move["pp"] as Long
+                    val type = move["type"] as String
+                    val category = move["category"] as String
+                    movesFragMap[index] = Move(lvlReq,name,category,type,power, accuracy,pp)
                 }
             }
-
-            stats.let { statsMap ->
-                for(key in statsMap.keys) {
-                    val name = key
-                    val value = statsMap[key]
-                }
-            }
-
 
             if(evolutionMap is HashMap<*,*>)
             {
                 for(key in evolutionMap.keys)
                 {
-                    val id = key.toString().toInt()
                     val detailedMap = evolutionMap[key] as HashMap<*,*>
-                    evolutionList.add(PokeEvo(
+                    evolutionList.add(
+                        PokeEvo(
                         fetchResourceID(key.toString()), detailedMap["minLevel"] as Long,
                     detailedMap["trigger"] as String, detailedMap["priority"] as Long
-                    ))
+                    )
+                    )
                 }
             }
 
@@ -175,11 +177,15 @@ class InfoMainActivity : AppCompatActivity() {
                     val detailedMap = evolutionMap[i] as HashMap<*,*>
                     evolutionList.add( PokeEvo(fetchResourceID(i.toString()), detailedMap["minLevel"] as Long,
                     detailedMap["trigger"] as String, detailedMap["priority"] as Long
-                ))
+                )
+                    )
                 }
 
             }
-            // Use other retrieved values (baseExp, effort, moves, stats) as needed
+
+            aboutFragMap["evolution"] = evolutionList
+            aboutFragMap["abilities"] = abilitiesList
+            aboutFragMap["stats"] = aboutStats
         }
     }
 
@@ -193,7 +199,7 @@ class InfoMainActivity : AppCompatActivity() {
         button.setImageDrawable(getDrawable(R.drawable.gender_switch))
         tabLayout = findViewById(R.id.tab_layout)
         viewPager = findViewById(R.id.view_pager)
-        pageAdapter = PageAdapter(supportFragmentManager,lifecycle,evolutionList,abilitiesList,aboutStats)
+        pageAdapter = PageAdapter(supportFragmentManager,lifecycle,aboutFragMap,statsFragMap,movesFragMap)
         viewPager.adapter = pageAdapter
 
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {

@@ -1,7 +1,7 @@
-package com.example.pokedex.main
+package com.example.pokedex.adapter_class
 
 
-import Pokemon
+import com.example.pokedex.data_class.Pokemon
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -73,7 +73,6 @@ class PokedexAdapter(private val context: Context, private val pokemonList: List
                 intent.putExtra("name", name.text)
                 intent.putExtra("type1", type1.drawable.toString())
                 view.context.startActivity(intent)
-                Toast.makeText(view.context, "${id.text} is clicked", Toast.LENGTH_SHORT).show()
             }
 
         }
@@ -105,7 +104,6 @@ class PokedexAdapter(private val context: Context, private val pokemonList: List
                 intent.putExtra("type1", type1.drawable.toString())
                 intent.putExtra("type2", type2.drawable.toString())
                 view.context.startActivity(intent)
-                Toast.makeText(view.context, "${id.text} is clicked", Toast.LENGTH_SHORT).show()
             }
         }
 

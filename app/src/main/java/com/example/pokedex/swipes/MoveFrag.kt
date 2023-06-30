@@ -5,22 +5,34 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.pokedex.R
+import com.example.pokedex.adapter_class.MoveAdapter
+import com.example.pokedex.data_class.Move
 
 /**
  * A simple [Fragment] subclass.
  * Use the [MoveFrag.newInstance] factory method to
  * create an instance of this fragment.
  */
-class MoveFrag : Fragment() {
-
+class MoveFrag(var movesFragMap: Map<Int, Move>) : Fragment() {
+    private lateinit var moveAdapter : MoveAdapter
+    private lateinit var recyclerView: RecyclerView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
+        val rootView = inflater.inflate(R.layout.fragment_move, container, false)
+        recyclerView = rootView.findViewById(R.id.moveRecycler)
+        recyclerView.layoutManager = LinearLayoutManager(context)
+        movesFragMap = movesFragMap.toList().sortedBy { it.second.lvl }.toMap()
+        moveAdapter = MoveAdapter(movesFragMap)
+        recyclerView.adapter = moveAdapter
+
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_move, container, false)
+        return rootView
     }
 
 }

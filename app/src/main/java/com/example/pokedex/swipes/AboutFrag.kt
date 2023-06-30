@@ -11,16 +11,16 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.pokedex.R
-import com.example.pokedex.evolution.EvolutionAdapter
-import com.example.pokedex.evolution.PokeEvo
-import com.example.pokedex.main.Ability
+import com.example.pokedex.adapter_class.EvolutionAdapter
+import com.example.pokedex.data_class.Ability
+import com.example.pokedex.data_class.PokeEvo
 
 /**
  * A simple [Fragment] subclass.
  * Use the [About.newInstance] factory method to
  * create an instance of this fragment.
  */
-class About(var evolutionTree: MutableList<PokeEvo>, var abilitiesTree: MutableList<Ability>, var aboutTree: HashMap<String, Any>) : Fragment() {
+class AboutFrag(var aboutFragMap: HashMap<String,Any>) : Fragment() {
     private lateinit var evolutionRecyclerView: RecyclerView
     private lateinit var evolutionAdapter: EvolutionAdapter
     private lateinit var evolutionList: MutableList<PokeEvo>
@@ -30,9 +30,9 @@ class About(var evolutionTree: MutableList<PokeEvo>, var abilitiesTree: MutableL
 
     private fun initializer()
     {
-        evolutionList = evolutionTree
-        abilitiesList = abilitiesTree
-        aboutStats = aboutTree
+        evolutionList = aboutFragMap["evolution"] as MutableList<PokeEvo>
+        abilitiesList = aboutFragMap["abilities"] as MutableList<Ability>
+        aboutStats = aboutFragMap["stats"] as HashMap<String, Any>
 
     }
     @SuppressLint("CutPasteId")

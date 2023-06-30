@@ -1,4 +1,4 @@
-package com.example.pokedex.evolution
+package com.example.pokedex.data_class
 
 data class EvolutionData(
     val id: String,

@@ -1,6 +1,5 @@
-package com.example.pokedex.evolution
+package com.example.pokedex.adapter_class
 
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +9,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.pokedex.R
+import com.example.pokedex.data_class.PokeEvo
 
 class EvolutionAdapter(private var pokemonList: MutableList<PokeEvo>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
