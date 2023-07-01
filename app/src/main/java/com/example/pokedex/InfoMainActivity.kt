@@ -1,10 +1,13 @@
 package com.example.pokedex
 
+
 import android.annotation.SuppressLint
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.os.Handler
+import android.util.Log
 import android.view.View
-import android.widget.ImageButton
+import android.view.ViewTreeObserver
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -23,16 +26,18 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import pl.droidsonroids.gif.GifDrawable
+import java.util.concurrent.ScheduledExecutorService
 
 
 @Suppress("UNCHECKED_CAST")
-class InfoMainActivity : AppCompatActivity() {
+class InfoMainActivity() : AppCompatActivity() {
     private lateinit var viewPager : ViewPager2
     private lateinit var tabLayout: TabLayout
     private lateinit var pageAdapter : PageAdapter
     private lateinit var types : HashMap<String, Int>
 
-
+    private lateinit var genderImage : HashMap<String,Int>
     private lateinit var evolutionList : ArrayList<PokeEvo>
     private lateinit var abilitiesList : ArrayList<Ability>
     private lateinit var aboutStats : HashMap<String,Any>
@@ -53,7 +58,9 @@ class InfoMainActivity : AppCompatActivity() {
     private lateinit var typeView : ImageView
     private lateinit var typeView2 : ImageView
     private lateinit var genderView : ImageView
+    private lateinit var gifDrawable : GifDrawable
     private val database = Firebase.database
+    private var flag: Boolean = false
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,6 +81,7 @@ class InfoMainActivity : AppCompatActivity() {
         aboutFragMap = HashMap()
         statsFragMap = HashMap()
         movesFragMap = ArrayList()
+        genderImage = HashMap()
         types = TypeIcons().hashTable()
         id = intent.getStringExtra("id")!!
         id = id.replace("§","").trim()
@@ -86,8 +94,7 @@ class InfoMainActivity : AppCompatActivity() {
         viewPager = findViewById(R.id.view_pager)
         pageAdapter = PageAdapter(supportFragmentManager,lifecycle,aboutFragMap,statsFragMap,movesFragMap)
         viewPager.adapter = pageAdapter
-
-        genderView = findViewById<ImageButton>(R.id.genderSwitch)
+        genderView = findViewById(R.id.genderSwitch)
         imageView = findViewById(R.id.pokedexAvatar)
         idView = findViewById(R.id.pokedexID)
         nameView = findViewById(R.id.pokedexPokemonName)
@@ -103,13 +110,12 @@ class InfoMainActivity : AppCompatActivity() {
         val convertedString = stringBuilder.toString()
         idView.text = convertedString
         nameView.text = name
+        gifDrawable = GifDrawable(resources, R.drawable.gender_switch)
 
         Glide.with(this)
-            .asGif()
-            .load(R.drawable.gender_switch)
+            .load(gifDrawable)
             .into(genderView)
-
-
+        genderObserver()
         typeView.setImageDrawable(getDrawable(type1))
 
         if(type2 != "")
@@ -122,6 +128,57 @@ class InfoMainActivity : AppCompatActivity() {
         }
     }
 
+    private fun genderObserver()
+    {
+        gifDrawable.setSpeed(1.5f)
+
+        val viewTreeObserver = genderView.viewTreeObserver
+        viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                genderView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                if (gifDrawable.isRunning) {
+                    gifDrawable.pause()
+                }
+                if(gifDrawable.currentFrameIndex > 100)
+                {
+                    gifDrawable.reset()
+                }
+
+            }
+        })
+
+        genderView.setOnClickListener {
+            gifDrawable.start()
+            Handler().postDelayed({
+                gifDrawable.pause()
+                if(flag)
+                {
+                    if(genderImage["male"] != null)
+                    {
+                        Glide.with(this)
+                            .load(genderImage["male"])
+                            .into(imageView)
+                    }
+                    else
+                    {
+                        val resourceID = fetchResourceIDMale(id)
+                        Glide.with(this)
+                            .load(resourceID)
+                            .into(imageView)
+                        genderImage["male"] = resourceID
+                    }
+
+                }
+                else
+                {
+                    Glide.with(this)
+                        .load(genderImage["female"])
+                        .into(imageView)
+                }
+            },1300)
+            flag = !flag
+        }
+    }
 
     private fun getDrawable(type : String): Drawable? {
         val resourceId = resources.getIdentifier(type, "drawable", packageName)
@@ -178,10 +235,20 @@ class InfoMainActivity : AppCompatActivity() {
         }
         return drawableResourceId
     }
+    private fun fetchResourceIDMale(drawableName : String): Int {
+        var drawableResourceId = resources.getIdentifier("p$drawableName", "drawable", packageName)
+        if (drawableResourceId == 0) {
+            val name = "p${drawableName}_m"
+            drawableResourceId =
+                resources.getIdentifier(name, "drawable", packageName)
+        }
+        return drawableResourceId
+    }
     @SuppressLint("SetTextI18n")
     private fun receiveDataFromPreviousActivity()
     {
         val drawableResourceId= fetchResourceID(id)
+        genderImage["female"] = drawableResourceId;
         Glide.with(this)
             .load(drawableResourceId)
             .into(imageView)
