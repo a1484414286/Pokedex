@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.pokedex.R
 import com.example.pokedex.adapter_class.MoveAdapter
 import com.example.pokedex.data_class.Move
+import com.example.pokedex.data_class.TypeIcons
 
 /**
  * A simple [Fragment] subclass.
@@ -19,16 +20,18 @@ import com.example.pokedex.data_class.Move
 class MoveFrag(var movesFragMap: ArrayList<Move>) : Fragment() {
     private lateinit var moveAdapter : MoveAdapter
     private lateinit var recyclerView: RecyclerView
+    private lateinit var typesChart : HashMap<String,Int>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
+        typesChart = TypeIcons().typeTable()
         val rootView = inflater.inflate(R.layout.fragment_move, container, false)
         recyclerView = rootView.findViewById(R.id.moveRecycler)
         recyclerView.layoutManager = LinearLayoutManager(context)
         movesFragMap.sortBy { it.lvl }
-        moveAdapter = MoveAdapter(movesFragMap)
+        moveAdapter = MoveAdapter(movesFragMap,typesChart)
         recyclerView.adapter = moveAdapter
 
         // Inflate the layout for this fragment

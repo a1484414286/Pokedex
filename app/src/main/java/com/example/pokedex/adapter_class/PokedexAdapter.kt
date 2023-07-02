@@ -31,7 +31,7 @@ import java.io.ByteArrayOutputStream
 
 class PokedexAdapter(private val context: Context, private val pokemonList: List<Pokemon>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    private val hashTable = TypeIcons().hashTable() as HashMap<String,Int>
+    private val hashTable = TypeIcons().typeTable()
     companion object {
         private const val ITEM_TYPE_ONE = 1
         private const val ITEM_TYPE_TWO = 2
@@ -44,7 +44,6 @@ class PokedexAdapter(private val context: Context, private val pokemonList: List
         val animated_sprites: ImageView
         val type1: ImageButton
         var type1Name : String = ""
-
         init {
             // Find our RecyclerView item's ImageView for future use
             id = view.findViewById(R.id.Id)
@@ -104,7 +103,7 @@ class PokedexAdapter(private val context: Context, private val pokemonList: List
         val screenWidth = displayMetrics.widthPixels
         val screenHeight = displayMetrics.heightPixels
         val itemWidth = (screenWidth / 3) - (2* 20) // Adjust the left and right margin as needed
-        val itemHeight = (screenHeight * 0.3).toInt() // Adjust the percentage as needed
+        val itemHeight = (screenHeight * 0.2).toInt() // Adjust the percentage as needed
         if (viewType == ITEM_TYPE_ONE) {
             val relativeLayout = view.findViewById<RelativeLayout>(R.id.singleItemLayout)
             val layoutParams = RelativeLayout.LayoutParams(itemWidth, itemHeight)
@@ -161,7 +160,7 @@ class PokedexAdapter(private val context: Context, private val pokemonList: List
                     resizeImageToFit(
                         context,
                         it,
-                        120,
+                        130,
                         50
                     )
                 })

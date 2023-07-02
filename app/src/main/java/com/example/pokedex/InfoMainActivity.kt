@@ -82,7 +82,8 @@ class InfoMainActivity() : AppCompatActivity() {
         statsFragMap = HashMap()
         movesFragMap = ArrayList()
         genderImage = HashMap()
-        types = TypeIcons().hashTable()
+        types = TypeIcons().typeTable()
+
         id = intent.getStringExtra("id")!!
         id = id.replace("§","").trim()
         name = intent.getStringExtra("name")!!

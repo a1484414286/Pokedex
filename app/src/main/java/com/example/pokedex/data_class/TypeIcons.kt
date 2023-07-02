@@ -3,7 +3,7 @@ package com.example.pokedex.data_class
 import com.example.pokedex.R
 
 class TypeIcons {
-    private val hashTable: HashMap<String, Int> = HashMap<String, Int>().apply {
+    private val typesTable: HashMap<String, Int> = HashMap<String, Int>().apply {
         R.drawable.normal.let { put("normal", it) }
         R.drawable.fire.let { put("fire", it) }
         R.drawable.flying.let { put("flying", it) }
@@ -24,8 +24,17 @@ class TypeIcons {
         R.drawable.fairy.let { put("fairy", it) }
     }
 
-    fun hashTable(): HashMap<String, Int> {
-        return hashTable
+    private val cateTable: HashMap<String, Int> = HashMap<String, Int>().apply {
+        R.drawable.normal.let { put("status", it) }
+        R.drawable.fire.let { put("physical", it) }
+        R.drawable.flying.let { put("magical", it) }
+    }
+
+    fun typeTable(): HashMap<String, Int> {
+        return typesTable
+    }
+    fun cateTable(): HashMap<String, Int> {
+        return typesTable
     }
 
 }

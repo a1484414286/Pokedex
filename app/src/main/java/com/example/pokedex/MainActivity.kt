@@ -4,6 +4,7 @@ import com.example.pokedex.data_class.Pokemon
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
+import android.widget.SearchView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
@@ -23,9 +24,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.Headers
-import org.json.JSONArray
 import org.json.JSONObject
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.regex.Pattern
 import kotlin.collections.ArrayList
@@ -35,6 +34,9 @@ import kotlin.collections.HashMap
 class MainActivity : AppCompatActivity() {
     private lateinit var pokemonList: MutableList<Pokemon>
     private lateinit var recyclerView: RecyclerView
+    private lateinit var searchResult: MutableList<Pokemon>
+    private lateinit var searchBar: SearchView
+    private val maxIndex = 807
 
     private val database = Firebase.database
 
@@ -45,15 +47,74 @@ class MainActivity : AppCompatActivity() {
         pokemonRecyclerViewSetup()
 //        fetchData();
 //        deleteData()
+        searchBarQuery()
+        searchBarIconFocusOff()
 
     }
 
+    fun extractNumberFromString(string: String): String? {
+        val pattern = Regex("\\d+")
+        val matchResult = pattern.find(string)
+        return matchResult?.value
+    }
+    private fun searchBarQuery()
+    {
+        searchBar.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                val searchable = extractNumberFromString(query)?.toInt()
+                if((searchable != null && searchable < maxIndex ) && !searchResult.contains(pokemonList[searchable.toInt()-1]))
+                {
+                    searchResult.add(pokemonList[searchable.toInt()-1])
+                }
+                else
+                {
+                    val foundObj = pokemonList.find { it.name == query }
+                    searchResult.add(foundObj!!)
+                }
+                recyclerView.adapter = PokedexAdapter(recyclerView.context,searchResult)
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                searchResult = ArrayList()
+                recyclerView.adapter = PokedexAdapter(recyclerView.context,pokemonList)
+                return true
+            }
+        })
+
+    }
+
+    private fun searchBarIconFocusOff()
+    {
+        searchBar.setOnClickListener {
+            searchBar.isIconified = false // Expand the search view
+        }
+
+        searchBar.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                searchBar.isIconified = false // Expand the search view
+            }
+        }
+    }
+    private fun fetchResourceId(index : Int): Int {
+        var drawableName = "p${index}"
+        var drawableResourceId = resources.getIdentifier(drawableName, "drawable", packageName)
+
+        if (drawableResourceId == 0) {
+            drawableName = "p${index}_f"
+            drawableResourceId = resources.getIdentifier(drawableName, "drawable", packageName)
+
+        }
+        return drawableResourceId
+    }
 
     private fun pokemonRecyclerViewSetup()
     {
         recyclerView = findViewById(R.id.verticalRecyclerView)
         recyclerView.layoutManager = GridLayoutManager(this, 3)
         pokemonList = ArrayList()
+        searchResult = ArrayList()
+        searchBar = findViewById(R.id.searchBar)
         addData()
         val adapter = PokedexAdapter(this, pokemonList)
         recyclerView.adapter = adapter
@@ -77,9 +138,8 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    @SuppressLint("DiscouragedApi")
+    @SuppressLint("DiscouragedApi", "NotifyDataSetChanged")
     private fun addData() {
-        val maxIndex = 807
         val scope = CoroutineScope(Dispatchers.Main)
         val sortedMap = ConcurrentHashMap<Int, Pokemon>()
         val deferred = CompletableDeferred<Unit>()
@@ -88,15 +148,8 @@ class MainActivity : AppCompatActivity() {
 
         for (index in 1..maxIndex) {
             scope.launch {
-                var drawableName = "p${index}"
-                var drawableResourceId = resources.getIdentifier(drawableName, "drawable", packageName)
-
-                if (drawableResourceId == 0) {
-                    drawableName = "p${index}_f"
-                    drawableResourceId = resources.getIdentifier(drawableName, "drawable", packageName)
-
-                }
-
+                val drawableName = "p${index}"
+                val drawableResourceId = fetchResourceId(index)
                 val drawable = ContextCompat.getDrawable(this@MainActivity, drawableResourceId)
 
                 test(index) { name, types ->

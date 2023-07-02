@@ -40,18 +40,25 @@
                 android:id="@+id/typeCol"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
+                android:layout_weight="1.2"
                 android:gravity="center"
                 android:text="@string/type" />
+
+            <Space
+                android:layout_width="8dp"
+                android:layout_height="match_parent" />
 
             <TextView
                 android:id="@+id/categoryCol"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
+                android:layout_weight="0.6"
                 android:gravity="center"
                 android:text="@string/cat" />
 
+            <Space
+                android:layout_width="8dp"
+                android:layout_height="match_parent" />
             <TextView
                 android:id="@+id/powerCol"
                 android:layout_width="0dp"
@@ -77,6 +84,15 @@
                 android:text="@string/pp" />
 
         </LinearLayout>
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.127" />
 
 
         <androidx.recyclerview.widget.RecyclerView
