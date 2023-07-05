@@ -3,12 +3,15 @@ package com.example.pokedex.adapter_class
 
 import com.example.pokedex.data_class.Pokemon
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.TransitionDrawable
+import android.os.Handler
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
@@ -19,18 +22,18 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
-import android.widget.Toast
-import androidx.core.graphics.drawable.toBitmap
+import androidx.core.app.ActivityOptionsCompat
+import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.pokedex.InfoMainActivity
 import com.example.pokedex.R
 import com.example.pokedex.data_class.TypeIcons
-import java.io.ByteArrayOutputStream
 
 
 class PokedexAdapter(private val context: Context, private val pokemonList: List<Pokemon>) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
     private val hashTable = TypeIcons().typeTable()
     companion object {
         private const val ITEM_TYPE_ONE = 1
@@ -38,7 +41,8 @@ class PokedexAdapter(private val context: Context, private val pokemonList: List
 
     }
 
-    class ViewHolderOne(view: View) : RecyclerView.ViewHolder(view) {
+    @SuppressLint("ResourceType")
+    class ViewHolderOne(view: View, private val context : Context) : RecyclerView.ViewHolder(view) {
         val id: TextView
         val name: TextView
         val animated_sprites: ImageView
@@ -52,19 +56,29 @@ class PokedexAdapter(private val context: Context, private val pokemonList: List
             type1 = view.findViewById(R.id.type1)
 
             view.setOnClickListener {
-                var intent = Intent(view.context, InfoMainActivity::class.java)
+                if (view.isClickable) {
+                    view.isClickable = false
+                }
+                Handler().postDelayed({ view.isClickable = true }, 1000)
+
+                val intent = Intent(view.context, InfoMainActivity::class.java)
                 intent.putExtra("id", id.text)
                 intent.putExtra("name", name.text)
                 intent.putExtra("type1", type1Name)
-                view.context.startActivity(intent)
+
+                val transitionOptions = ActivityOptionsCompat.makeCustomAnimation(
+                    context as Activity,
+                    R.transition.custom_transition,
+                    R.transition.custom_transition
+                ).toBundle()
+
+                view.context.startActivity(intent,transitionOptions)
             }
-
         }
-
     }
 
 
-    class ViewHolderTwo(view: View) : RecyclerView.ViewHolder(view) {
+    class ViewHolderTwo(view: View, private val context: Context) : RecyclerView.ViewHolder(view) {
         val id: TextView
         val name: TextView
         val animated_sprites: ImageView
@@ -83,17 +97,27 @@ class PokedexAdapter(private val context: Context, private val pokemonList: List
 
 
             view.setOnClickListener {
-                var intent = Intent(view.context, InfoMainActivity::class.java)
+                if(view.isClickable)
+                {
+                    view.isClickable = false
+                }
+                Handler().postDelayed({view.isClickable=true},1000)
+                val intent = Intent(view.context, InfoMainActivity::class.java)
                 intent.putExtra("id", id.text)
                 intent.putExtra("name", name.text)
                 intent.putExtra("type1", type1Name)
                 intent.putExtra("type2", type2Name)
-                view.context.startActivity(intent)
+                val transitionOptions = ActivityOptionsCompat.makeCustomAnimation(
+                    context as Activity,
+                    R.transition.custom_transition,
+                    R.transition.custom_transition
+                ).toBundle()
+
+                view.context.startActivity(intent,transitionOptions)
             }
         }
 
     }
-
 
 
     private fun adjustRelativeLayoutSize(view: View, viewType: Int) {
@@ -103,7 +127,7 @@ class PokedexAdapter(private val context: Context, private val pokemonList: List
         val screenWidth = displayMetrics.widthPixels
         val screenHeight = displayMetrics.heightPixels
         val itemWidth = (screenWidth / 3) - (2* 20) // Adjust the left and right margin as needed
-        val itemHeight = (screenHeight * 0.2).toInt() // Adjust the percentage as needed
+        val itemHeight = (screenHeight * 0.3).toInt() // Adjust the percentage as needed
         if (viewType == ITEM_TYPE_ONE) {
             val relativeLayout = view.findViewById<RelativeLayout>(R.id.singleItemLayout)
             val layoutParams = RelativeLayout.LayoutParams(itemWidth, itemHeight)
@@ -125,8 +149,8 @@ class PokedexAdapter(private val context: Context, private val pokemonList: List
         }
         adjustRelativeLayoutSize(view, viewType)
         return when (viewType) {
-            ITEM_TYPE_ONE -> ViewHolderOne(view)
-            ITEM_TYPE_TWO -> ViewHolderTwo(view)
+            ITEM_TYPE_ONE -> ViewHolderOne(view,context)
+            ITEM_TYPE_TWO -> ViewHolderTwo(view,context)
             else -> throw IllegalArgumentException("Invalid view type: $viewType")
         }
     }

@@ -37,4 +37,13 @@
             android:layout_height="match_parent" />
 
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/ai_gif"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:scaleType="fitCenter"
+        />
 </RelativeLayout>

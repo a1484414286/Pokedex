@@ -2,13 +2,18 @@ package com.example.pokedex
 
 import com.example.pokedex.data_class.Pokemon
 import android.annotation.SuppressLint
+import android.content.Context
+import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
+import android.view.inputmethod.InputMethodManager
+import android.widget.ImageView
 import android.widget.SearchView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.codepath.asynchttpclient.AsyncHttpClient
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler
 import com.example.pokedex.data_class.EvolutionData
@@ -23,8 +28,17 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import okhttp3.Headers
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
+import org.json.JSONArray
 import org.json.JSONObject
+import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.regex.Pattern
 import kotlin.collections.ArrayList
@@ -40,17 +54,55 @@ class MainActivity : AppCompatActivity() {
 
     private val database = Firebase.database
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override  fun onCreate(savedInstanceState: Bundle?) {
         FirebaseApp.initializeApp(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        pokemonRecyclerViewSetup()
 //        fetchData();
 //        deleteData()
+        pokemonRecyclerViewSetup()
         searchBarQuery()
         searchBarIconFocusOff()
-
+//        runBlocking {
+//            val response = generateChatResponse("What is the weather like today?")
+//            if (response != null) {
+//                Log.e("RUNTIME<STRRRR>",response)
+//            }
+//        }
     }
+
+//    suspend fun generateChatResponse(message: String): String? = withContext(Dispatchers.IO) {
+//        val url = "https://api.openai.com/v1/chat/completions"
+//        val mediaType = "application/json; charset=utf-8".toMediaType()
+//        val apiKey = "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"
+//        val model = "gpt-3.5-turbo"
+//        val json = """
+//        {
+//            "model": "$model",
+//            "messages": [
+//                {"role": "system", "content": "You are ChatGPT"},
+//                {"role": "user", "content": "$message"}
+//            ]
+//        }
+//    """.trimIndent()
+//
+//        val requestBody = json.toRequestBody(mediaType)
+//        val httpRequest: Request = Request.Builder()
+//            .url(url)
+//            .addHeader("Content-Type", "application/json")
+//            .addHeader("Authorization", "Bearer $apiKey")
+//            .post(requestBody)
+//            .build()
+//
+//        val client = OkHttpClient()
+//        try {
+//            val response: Response = client.newCall(httpRequest).execute()
+//            response.body?.string()
+//        } catch (e: IOException) {
+//            e.printStackTrace()
+//            null
+//        }
+//    }
 
     fun extractNumberFromString(string: String): String? {
         val pattern = Regex("\\d+")
@@ -66,11 +118,11 @@ class MainActivity : AppCompatActivity() {
                 {
                     searchResult.add(pokemonList[searchable.toInt()-1])
                 }
-                else
-                {
-                    val foundObj = pokemonList.find { it.name == query }
-                    searchResult.add(foundObj!!)
-                }
+//                else
+//                {
+//                    val foundObj = pokemonList.find { it.name == query }
+//                    searchResult.add(foundObj!!)
+//                }
                 recyclerView.adapter = PokedexAdapter(recyclerView.context,searchResult)
                 return true
             }
@@ -80,20 +132,33 @@ class MainActivity : AppCompatActivity() {
                 recyclerView.adapter = PokedexAdapter(recyclerView.context,pokemonList)
                 return true
             }
-        })
 
+        })
+        searchBar.suggestionsAdapter = null
     }
 
-    private fun searchBarIconFocusOff()
-    {
+    private fun searchBarIconFocusOff() {
         searchBar.setOnClickListener {
             searchBar.isIconified = false // Expand the search view
         }
 
-        searchBar.setOnFocusChangeListener { _, hasFocus ->
+        searchBar.setOnQueryTextFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 searchBar.isIconified = false // Expand the search view
             }
+        }
+    }
+
+    @SuppressLint("ServiceCast")
+    override fun onBackPressed() {
+        if (!searchBar.isIconified) {
+            searchBar.isIconified = true // Collapse the search view
+            searchBar.clearFocus() // Clear the focus from the search view
+            // Hide the keyboard
+            val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            inputMethodManager.hideSoftInputFromWindow(searchBar.windowToken, 0)
+        } else {
+            super.onBackPressed() // Perform the default back button behavior
         }
     }
     private fun fetchResourceId(index : Int): Int {
@@ -118,6 +183,10 @@ class MainActivity : AppCompatActivity() {
         addData()
         val adapter = PokedexAdapter(this, pokemonList)
         recyclerView.adapter = adapter
+        val ai_gif = findViewById<ImageView>(R.id.ai_gif)
+        Glide.with(this)
+            .load(R.drawable.ai_mode)
+            .into(ai_gif)
     }
 
     private fun test(index: Int, callback: (name: String?, types: List<Any>?) -> Unit) {
@@ -246,7 +315,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun hashMapSetUp(): HashMap<String, Any> {
-        var map = HashMap<String, Any>()
+        val map = HashMap<String, Any>()
 //        map["id"] = 0;
 //        map["base_exp"] = 0
 //        map["weight"] = 0
@@ -255,8 +324,8 @@ class MainActivity : AppCompatActivity() {
 //        map["types"] = ArrayList<String>()
 //        map["stats"] = HashMap<String, Int>()
 //        map["effort"] = HashMap<String, Int>()
-        map["moves"] = HashMap<String, HashMap<String, Any>>()
-//        map["evolution"] = HashMap<Any,Any>()
+//        map["moves"] = HashMap<String, HashMap<String, Any>>()
+        map["evolution"] = HashMap<Any,Any>()
         return map
 
     }
@@ -295,17 +364,18 @@ class MainActivity : AppCompatActivity() {
         val client = AsyncHttpClient()
 //        val params = RequestParams()
         val evolutionFlag = true
-        val movesFlag = true
+        val movesFlag = false
+        val statsFlag = false
 //        params["limit"] = "5"
 //        params["page"] = "0"
 ////        val randomValue = (0..1009).random()
-        var index = 799
-        while(index != 1011) {
+        var index = 0
+        while(index != 539) {
             val map = hashMapSetUp()
 
             client.run {
 
-                if(!evolutionFlag){
+                if(evolutionFlag){
                 get(/* url = */"https://pokeapi.co/api/v2/evolution-chain/$index",
                     object : JsonHttpResponseHandler()
                     {
@@ -315,7 +385,7 @@ class MainActivity : AppCompatActivity() {
                             response: String?,
                             throwable: Throwable?
                         ) {
-                            Log.e("ERROR", "SOMETHING WENT WRONG")
+                            Log.e("ERROR", "SOMETHING WENT WRONG {$index}")
                         }
 
                         override fun onSuccess(statusCode: Int, headers: Headers?, json: JsonHttpResponseHandler.JSON) {
@@ -370,7 +440,6 @@ class MainActivity : AppCompatActivity() {
                                         minHappiness = minHappiness,
                                         timeOfDay = time
                                     )
-                                    priority++;
                                     evolutionDataList.add(evolutionData)
                                 } else {
                                    val evolutionData = EvolutionData(
@@ -470,61 +539,61 @@ class MainActivity : AppCompatActivity() {
                 )
                 }
 
-                if(evolutionFlag)
+                if(statsFlag)
                 {
 
-                get("https://pokeapi.co/api/v2/pokemon/$index", object : JsonHttpResponseHandler() {
-                    override fun onSuccess(
-                        statusCode: Int,
-                        headers: Headers,
-                        json: JsonHttpResponseHandler.JSON
-                    ) {
+                        get("https://pokeapi.co/api/v2/pokemon/$index", object : JsonHttpResponseHandler() {
+                            override fun onSuccess(
+                                statusCode: Int,
+                                headers: Headers,
+                                json: JsonHttpResponseHandler.JSON
+                            ) {
 
-                        var jsonList = json.jsonObject
-                        val myRef = database.getReference(jsonList.get("id").toString())
-//                        val jsonArr: JSONArray = jsonList.get("abilities") as JSONArray
-//                        var abilitiesMap = map["abilities"] as HashMap<String, Boolean>;
-//                        for (i in 0 until jsonArr.length()) {
-//                            val abilities = jsonArr.get(i) as JSONObject
-//                            val ability = abilities.get("ability") as JSONObject
-//                            val hidden = abilities.get("is_hidden") as Boolean
-//                            val name = ability.get("name") as String
-//                            abilitiesMap[name] = hidden
-//                        }
+                                var jsonList = json.jsonObject
+                                val myRef = database.getReference(jsonList.get("id").toString())
+//                                val jsonArr: JSONArray = jsonList.get("abilities") as JSONArray
+//                                var abilitiesMap = map["abilities"] as HashMap<String, Boolean>;
+//                                for (i in 0 until jsonArr.length()) {
+//                                    val abilities = jsonArr.get(i) as JSONObject
+//                                    val ability = abilities.get("ability") as JSONObject
+//                                    val hidden = abilities.get("is_hidden") as Boolean
+//                                    val name = ability.get("name") as String
+//                                    abilitiesMap[name] = hidden
+//                                }
 //
-//                        val types = jsonList.get("types") as JSONArray;
-//                        var typesArr = map["types"] as ArrayList<String>;
-//                        for (i in 0 until types.length()) {
-//                            val typeSlots = types.get(i) as JSONObject
-//                            val type = typeSlots.get("type") as JSONObject
-//                            val typeName = type.get("name") as String
-//                            typesArr.add(typeName)
-//                        }
+//                                val types = jsonList.get("types") as JSONArray;
+//                                var typesArr = map["types"] as ArrayList<String>;
+//                                for (i in 0 until types.length()) {
+//                                    val typeSlots = types.get(i) as JSONObject
+//                                    val type = typeSlots.get("type") as JSONObject
+//                                    val typeName = type.get("name") as String
+//                                    typesArr.add(typeName)
+//                                }
 //
-//                        val minLevel = if (jsonList.isNull("base_experience")) {
-//                            0 // Default value when "min_level" is null
-//                        } else {
-//                            jsonList.get("base_experience")
-//                        }
-//                        map["base_exp"] = minLevel
+//                                val minLevel = if (jsonList.isNull("base_experience")) {
+//                                    0 // Default value when "min_level" is null
+//                                } else {
+//                                    jsonList.get("base_experience")
+//                                }
+//                                map["base_exp"] = minLevel
 //
-//                        map["name"] = jsonList.get("name")
+//                                map["name"] = jsonList.get("name")
 //
-//                        map["height"] = jsonList.get("height")
-//                        map["weight"] = jsonList.get("weight")
-//                        val statsArr = jsonList.get("stats") as JSONArray;
-//                        val stats: HashMap<String, Int> = map["stats"] as HashMap<String, Int>
-//                        val effort: HashMap<String, Int> = map["effort"] as HashMap<String, Int>;
-//                        for (i in 0 until statsArr.length()) {
-//                            val genStats = statsArr.get(i) as JSONObject
-//                            val value = genStats.get("base_stat") as Int
-//                            val baseStats = genStats.get("stat") as JSONObject
-//                            val baseStatsName = baseStats.get("name") as String
-//                            stats[baseStatsName] = value
-//                            val effortVal = genStats.get("effort") as Int
-//                            effort[baseStatsName] = effortVal
-//                        }
-                        if(movesFlag)
+//                                map["height"] = jsonList.get("height")
+//                                map["weight"] = jsonList.get("weight")
+//                                val statsArr = jsonList.get("stats") as JSONArray;
+//                                val stats: HashMap<String, Int> = map["stats"] as HashMap<String, Int>
+//                                val effort: HashMap<String, Int> = map["effort"] as HashMap<String, Int>;
+//                                for (i in 0 until statsArr.length()) {
+//                                    val genStats = statsArr.get(i) as JSONObject
+//                                    val value = genStats.get("base_stat") as Int
+//                                    val baseStats = genStats.get("stat") as JSONObject
+//                                    val baseStatsName = baseStats.get("name") as String
+//                                    stats[baseStatsName] = value
+//                                    val effortVal = genStats.get("effort") as Int
+//                                    effort[baseStatsName] = effortVal
+//                                }
+                if(movesFlag)
                         {
 
 
@@ -538,7 +607,7 @@ class MainActivity : AppCompatActivity() {
                             val moveName = move.getString("name")
                             val versionGroupDetails =
                                 moves.getJSONObject(i).getJSONArray("version_group_details")
-                            Log.e("RUNTIME_LENGTH", versionGroupDetails.toString())
+//                            Log.e("RUNTIME_LENGTH", versionGroupDetails.toString())
 
 
                             for (j in 0 until versionGroupDetails.length()) {
@@ -632,7 +701,6 @@ class MainActivity : AppCompatActivity() {
                                             }
                                             myRef.updateChildren(map)
 
-
                                             // Update the completion counter
                                             synchronized(this) {
                                                 completedMoves++
@@ -667,11 +735,13 @@ class MainActivity : AppCompatActivity() {
 
             index++;
 
+            Log.e("RUNTIME_ID",index.toString())
         }
     }
 
     fun checkCompletion(totalMoves: Int, completedMoves: Int, movesMap: HashMap<String, Any>) {
         if (completedMoves == totalMoves) {
+
             // All requests are completed, you can now access the movesMap safely
         }
     }

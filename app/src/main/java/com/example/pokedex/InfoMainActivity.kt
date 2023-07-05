@@ -26,6 +26,10 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import pl.droidsonroids.gif.GifDrawable
 import java.util.concurrent.ScheduledExecutorService
 
@@ -151,31 +155,35 @@ class InfoMainActivity() : AppCompatActivity() {
         genderView.setOnClickListener {
             gifDrawable.start()
             Handler().postDelayed({
-                gifDrawable.pause()
-                if(flag)
+                if(gifDrawable.isRunning)
                 {
-                    if(genderImage["male"] != null)
+                    gifDrawable.pause()
+                    if(flag)
                     {
-                        Glide.with(this)
-                            .load(genderImage["male"])
-                            .into(imageView)
+                        if(genderImage["male"] != null)
+                        {
+                            Glide.with(this)
+                                .load(genderImage["male"])
+                                .into(imageView)
+                        }
+                        else
+                        {
+                            val resourceID = fetchResourceIDMale(id)
+                            Glide.with(this)
+                                .load(resourceID)
+                                .into(imageView)
+                            genderImage["male"] = resourceID
+                        }
+
                     }
                     else
                     {
-                        val resourceID = fetchResourceIDMale(id)
                         Glide.with(this)
-                            .load(resourceID)
+                            .load(genderImage["female"])
                             .into(imageView)
-                        genderImage["male"] = resourceID
                     }
+                }
 
-                }
-                else
-                {
-                    Glide.with(this)
-                        .load(genderImage["female"])
-                        .into(imageView)
-                }
             },1300)
             flag = !flag
         }
@@ -246,77 +254,77 @@ class InfoMainActivity() : AppCompatActivity() {
         return drawableResourceId
     }
     @SuppressLint("SetTextI18n")
-    private fun receiveDataFromPreviousActivity()
-    {
-        val drawableResourceId= fetchResourceID(id)
-        genderImage["female"] = drawableResourceId;
+
+
+    private fun receiveDataFromPreviousActivity() {
+
+        val drawableResourceId = fetchResourceID(id)
+        genderImage["female"] = drawableResourceId
         Glide.with(this)
             .load(drawableResourceId)
             .into(imageView)
 
-        loadDataFromDB(id.toInt()) { abilities, XP, effort, moves, stats, height, weight, evolutionMap->
+        loadDataFromDB(id.toInt()) { abilities, XP, effort, moves, stats, height, weight, evolutionMap ->
             // update ui based on data called back from fetch
+            CoroutineScope(Dispatchers.Main).launch {
 
-            aboutStats["base_exp"] = XP
-            aboutStats["height"] = height
-            aboutStats["weight"] = weight
+                aboutStats["base_exp"] = XP
+                aboutStats["height"] = height
+                aboutStats["weight"] = weight
 
-            statsFragMap["base"] = stats as java.util.HashMap<String, Long>
-            statsFragMap["effort"] = effort as java.util.HashMap<String, Long>
+                statsFragMap["base"] = stats as java.util.HashMap<String, Long>
+                statsFragMap["effort"] = effort as java.util.HashMap<String, Long>
 
-
-            abilities.let { list ->
-                for(ability in list.keys) {
-                    val name = ability
-                    val bool = list[ability] as Boolean
-                    abilitiesList.add(Ability(name,bool))
-                }
-            }
-
-            moves.let { movesMap ->
-                for(key in movesMap.keys) {
-                    val name = key
-                    val move = movesMap[key]
-                    val accuracy = move?.get("accuracy") as Long
-                    val lvlReq = move["lvl"] as Long
-                    val power = move["power"] as Long
-                    val pp = move["pp"] as Long
-                    val type = move["type"] as String
-                    val category = move["category"] as String
-                    movesFragMap.add(Move(lvlReq,name,category,type,power, accuracy,pp))
-                }
-            }
-
-            if(evolutionMap is HashMap<*,*>)
-            {
-                for(key in evolutionMap.keys)
-                {
-                    val detailedMap = evolutionMap[key] as HashMap<*,*>
-                    evolutionList.add(
-                        PokeEvo(
-                        fetchResourceID(key.toString()), detailedMap["minLevel"] as Long,
-                    detailedMap["trigger"] as String, detailedMap["priority"] as Long
-                    )
-                    )
-                }
-            }
-
-            else if(evolutionMap is ArrayList<*>)
-            {
-                for(i in 1 until evolutionMap.size)
-                {
-                    val detailedMap = evolutionMap[i] as HashMap<*,*>
-                    evolutionList.add( PokeEvo(fetchResourceID(i.toString()), detailedMap["minLevel"] as Long,
-                    detailedMap["trigger"] as String, detailedMap["priority"] as Long
-                )
-                    )
+                abilities.let { list ->
+                    for (ability in list.keys) {
+                        val name = ability
+                        val bool = list[ability] as Boolean
+                        abilitiesList.add(Ability(name, bool))
+                    }
                 }
 
-            }
+                moves.let { movesMap ->
+                    for (key in movesMap.keys) {
+                        val name = key
+                        val move = movesMap[key]
+                        val accuracy = move?.get("accuracy") as Long
+                        val lvlReq = move["lvl"] as Long
+                        val power = move["power"] as Long
+                        val pp = move["pp"] as Long
+                        val type = move["type"] as String
+                        val category = move["category"] as String
+                        movesFragMap.add(Move(lvlReq, name, category, type, power, accuracy, pp))
+                    }
+                }
 
-            aboutFragMap["evolution"] = evolutionList
-            aboutFragMap["abilities"] = abilitiesList
-            aboutFragMap["stats"] = aboutStats
+                if (evolutionMap is HashMap<*, *>) {
+                    for (key in evolutionMap.keys) {
+                        val detailedMap = evolutionMap[key] as HashMap<*, *>
+                        evolutionList.add(
+                            PokeEvo(
+                                fetchResourceID(key.toString()), detailedMap["minLevel"] as Long,
+                                detailedMap["trigger"] as String, detailedMap["priority"] as Long
+                            )
+                        )
+                    }
+                } else if (evolutionMap is ArrayList<*>) {
+                    for (i in 1 until evolutionMap.size) {
+                        val detailedMap = evolutionMap[i] as HashMap<*, *>
+                        evolutionList.add(
+                            PokeEvo(
+                                fetchResourceID(i.toString()), detailedMap["minLevel"] as Long,
+                                detailedMap["trigger"] as String, detailedMap["priority"] as Long
+                            )
+                        )
+                    }
+                }
+
+                aboutFragMap["evolution"] = evolutionList
+                aboutFragMap["abilities"] = abilitiesList
+                aboutFragMap["stats"] = aboutStats
+
+                // Pass the updated data to your adapter and fragment here
+            }
         }
     }
 

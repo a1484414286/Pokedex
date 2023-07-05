@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -28,12 +27,11 @@ class AboutFrag(var aboutFragMap: HashMap<String,Any>) : Fragment() {
     private lateinit var abilitiesList : MutableList<Ability>
     private lateinit var aboutStats : HashMap<String,Any>
 
-    private fun initializer()
+    fun initializer()
     {
-        evolutionList = aboutFragMap["evolution"] as MutableList<PokeEvo>
-        abilitiesList = aboutFragMap["abilities"] as MutableList<Ability>
-        aboutStats = aboutFragMap["stats"] as HashMap<String, Any>
-
+            evolutionList = aboutFragMap["evolution"] as MutableList<PokeEvo>
+            abilitiesList = aboutFragMap["abilities"] as MutableList<Ability>
+            aboutStats = aboutFragMap["stats"] as HashMap<String, Any>
     }
     @SuppressLint("CutPasteId")
     override fun onCreateView(
@@ -41,17 +39,35 @@ class AboutFrag(var aboutFragMap: HashMap<String,Any>) : Fragment() {
         savedInstanceState: Bundle?,
     ): View? {
         val rootView = inflater.inflate(R.layout.fragment_about, container, false)
-        initializer()
-        evolutionRecyclerView = rootView.findViewById(R.id.recyclerViewEvolution)
-        evolutionRecyclerView.layoutManager =
-            LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        if (aboutFragMap.isEmpty()) {
+            rootView.postDelayed({
+                initializer()
+                evolutionRecyclerView = rootView.findViewById(R.id.recyclerViewEvolution)
+                evolutionRecyclerView.layoutManager =
+                    LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
 
-        evolutionList = evolutionList.sortedBy { it.priority } as MutableList<PokeEvo>
-        evolutionAdapter = EvolutionAdapter(evolutionList)
-        evolutionRecyclerView.adapter = evolutionAdapter
+                evolutionList = evolutionList.sortedBy { it.priority } as MutableList<PokeEvo>
+                evolutionAdapter = EvolutionAdapter(evolutionList)
+                evolutionRecyclerView.adapter = evolutionAdapter
 
-        abilityHide(rootView)
-        setValue(rootView)
+                abilityHide(rootView)
+                setValue(rootView)
+            }, 500) // Adjust the delay as needed
+        } else {
+            initializer()
+            evolutionRecyclerView = rootView.findViewById(R.id.recyclerViewEvolution)
+            evolutionRecyclerView.layoutManager =
+                LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+
+            evolutionList = evolutionList.sortedBy { it.priority } as MutableList<PokeEvo>
+            evolutionAdapter = EvolutionAdapter(evolutionList)
+            evolutionRecyclerView.adapter = evolutionAdapter
+
+            abilityHide(rootView)
+            setValue(rootView)
+        }
+
+
         return rootView
     }
 
@@ -90,7 +106,6 @@ class AboutFrag(var aboutFragMap: HashMap<String,Any>) : Fragment() {
         val feetTotal = meters * feetPerMeter
         val feet = feetTotal.toInt()
         val inches = ((feetTotal - feet) * 12).toInt()
-        Toast.makeText(this.context, meters.toString(), Toast.LENGTH_SHORT).show()
 
         return "$feet'${String.format("%02d", inches)}\""
     }
